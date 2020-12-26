@@ -1,6 +1,6 @@
-'From Cuis 5.0 [latest update: #4426] on 17 December 2020 at 9:17:25 am'!
-'Description '!
-!provides: 'Kleene' 1 1!
+'From Cuis 5.0 [latest update: #4426] on 19 December 2020 at 10:24:32 pm'!
+'Description A library for automatic layout of state machine diagrams'!
+!provides: 'Kleene' 1 6!
 !requires: 'Gaudi' 1 22 nil!
 SystemOrganization addCategory: 'Kleene'!
 
@@ -46,10 +46,10 @@ StateDiagram class
 	instanceVariableNames: ''!
 
 
-!DiagramSelfTransition methodsFor: 'as yet unclassified' stamp: 'DF 12/16/2020 20:11:38'!
+!DiagramSelfTransition methodsFor: 'as yet unclassified' stamp: 'DF 12/18/2020 15:27:52'!
 asMorph
 
-	| alpha anArcMorph aLabelMorph labelPosition |
+	| alpha anArcMorph aLabelMorph labelPosition xoffset yoffset |
 	
 	alpha _ (magnet position - state position) degrees.
 	
@@ -58,6 +58,12 @@ asMorph
 	labelPosition _ anArcMorph morphLocalBounds center + ((anArcMorph radius@0) rotatedBy: (alpha + 0) degreesToRadians).
 	
 	aLabelMorph _ LabelMorph new contents: label; morphPosition: labelPosition; yourself.
+	
+	xoffset _ alpha degreesToRadians cos - 1.
+	
+	yoffset _ alpha degreesToRadians sin. 
+
+	aLabelMorph morphPosition: 	aLabelMorph morphPosition + ((xoffset @ yoffset) * aLabelMorph morphExtent)	.
 	
 	anArcMorph addMorph: aLabelMorph.
 
@@ -136,7 +142,7 @@ radius
 radius: aNumber
 	radius _ aNumber! !
 
-!DiagramTransition methodsFor: 'as yet unclassified' stamp: 'DF 12/15/2020 13:38:11'!
+!DiagramTransition methodsFor: 'as yet unclassified' stamp: 'DF 12/19/2020 18:07:49'!
 asMorph
 
 	| aMorph aLabelMorph pos |
@@ -146,12 +152,12 @@ asMorph
 	aMorph path: (path collect:[:each | each position ]).
 	
 	aMorph arrow: true; lineWidth:1; color: Color gray.
-	
+"	
 	pos _ labelMagnets collect:[:each | each position].
 	
 	aLabelMorph _ LabelMorph new contents: label; morphPosition: pos min; yourself.
 	
-	aMorph addMorph: aLabelMorph.
+	aMorph addMorph: aLabelMorph."
 	
 	^aMorph! !
 
@@ -185,7 +191,7 @@ buildLabelIn: aSolver attachedTo: aMagnet
 	
 	label size > 1 ifTrue:[labelMagnets add: d].! !
 
-!DiagramTransition methodsFor: 'as yet unclassified' stamp: 'DF 12/15/2020 22:21:47'!
+!DiagramTransition methodsFor: 'as yet unclassified' stamp: 'DF 12/19/2020 21:56:58'!
 buildPathIn: aForceSolver
 	
 	| destinationAnchor originAnchor originMagnet midMagnet destinationMagnet direction distance |
@@ -216,13 +222,13 @@ buildPathIn: aForceSolver
 	
 	aForceSolver addConstraint: (Spring length: origin radius strength:5 between:originAnchor and: originMagnet).
 
-	midMagnet _ Magnet 	charge: 50.0 position: origin position + (direction * distance / 2) + ((10 atRandom - 5) @ (10 atRandom -5)).
+	midMagnet _ Magnet 	charge: (45 to:55) atRandom position: origin position + (direction * distance / 2) + ((10 atRandom - 5) @ (10 atRandom -5)).
 
 	aForceSolver addObject: midMagnet.
 
 	path add: midMagnet.
 
-	self buildLabelIn: aForceSolver attachedTo: midMagnet.
+	"self buildLabelIn: aForceSolver attachedTo: midMagnet."
 		
 	destinationMagnet _ Magnet 	charge:30.0 position: destination position - (direction * origin radius) + ((10 atRandom - 5) @ (10 atRandom -5)).
 
@@ -232,9 +238,9 @@ buildPathIn: aForceSolver
 	
 	aForceSolver addConstraint: (Spring length: destination radius strength:5 between:destinationMagnet and: destinationAnchor).
 
-	aForceSolver addConstraint: (Spring length: distance / 16 strength: 1 between: originMagnet and: midMagnet).
+	aForceSolver addConstraint: (Spring length: distance / (10 to:20) atRandom strength: 0.8 between: originMagnet and: midMagnet).
 
-	aForceSolver addConstraint: (Spring length: distance / 16 strength: 1 between: midMagnet and: destinationMagnet).
+	aForceSolver addConstraint: (Spring length: distance / (10 to:20) atRandom strength: 0.8 between: midMagnet and: destinationMagnet).
 ! !
 
 !DiagramTransition methodsFor: 'as yet unclassified' stamp: 'DF 12/13/2020 14:16:52'!
@@ -276,12 +282,14 @@ origin: aDiagramState
 addState: aDiagramState
 	states add: aDiagramState.! !
 
-!StateDiagram methodsFor: 'as yet unclassified' stamp: 'DF 12/15/2020 20:06:53'!
+!StateDiagram methodsFor: 'as yet unclassified' stamp: 'DF 12/19/2020 17:09:00'!
 asMorph
 
 	| aMorph |
 	
-	aMorph _ KernelMorph new morphExtent: 640@480; color: Color transparent yourself.
+	self layoutDiagram.
+	
+	aMorph _ ProtrudingKernelMorph new morphExtent: 640@480; color: Color transparent yourself.
 	
 	transitions do:[:each | aMorph addMorph: each asMorph].
 
@@ -309,7 +317,7 @@ initialize
 	transitions _ Set new.
 	selfTransitions _ Set new.! !
 
-!StateDiagram methodsFor: 'as yet unclassified' stamp: 'DF 12/15/2020 19:25:44'!
+!StateDiagram methodsFor: 'as yet unclassified' stamp: 'DF 12/19/2020 16:53:49'!
 layoutDiagram
 
 	self layoutStates ; layoutTransitions.
@@ -317,14 +325,14 @@ layoutDiagram
 	
 	! !
 
-!StateDiagram methodsFor: 'as yet unclassified' stamp: 'DF 12/15/2020 18:43:58'!
+!StateDiagram methodsFor: 'as yet unclassified' stamp: 'DF 12/19/2020 22:15:54'!
 layoutStates
 
 	| magnets constraints aSolver |
 		
 	magnets _ Dictionary new.
 	
-	states do:[:each | magnets at: each put: (Magnet charge: each radius * 15 position: 640 atRandom @ 480 atRandom) ].
+	states do:[:each | magnets at: each put: (Magnet charge: each radius * 10 position: 640 atRandom @ 480 atRandom) ].
 	
 	constraints _ Dictionary new.
 	
@@ -334,7 +342,7 @@ layoutStates
 				ifPresent:[ :aConstraint | 
 					aConstraint length: (aConstraint length max: each label size) ]
 				ifAbsent:[constraints at: each key 
-					put: (Spring length: each label size * 24 * 2 strength: 0.1 between: (magnets at: each origin) and: (magnets at: each destination)) ] ].
+					put: (Spring length: 150  strength: 0.15 between: (magnets at: each origin) and: (magnets at: each destination)) ] ].
 		
 	aSolver _ ForceDirectedSolver 	new.
 	
@@ -342,11 +350,11 @@ layoutStates
 	
 	constraints do:[:each | aSolver addConstraint: each].
 	
-	aSolver ensureSeparationBy: 30 * 3; errorTolerance: 0.25; solve: 50.
+	aSolver ensureSeparationBy: 15 * 3; errorTolerance: 0.05; solve: 150.
 	
 	magnets associations do:[:each | each key position: each value position ].! !
 
-!StateDiagram methodsFor: 'as yet unclassified' stamp: 'DF 12/16/2020 20:19:09'!
+!StateDiagram methodsFor: 'as yet unclassified' stamp: 'DF 12/19/2020 18:05:15'!
 layoutTransitions
 
 	| aSolver |
@@ -359,9 +367,6 @@ layoutTransitions
 	
 	aSolver ensureSeparationBy: 0.25; errorTolerance:0.25; solve: 150.
 
-	"ForceDirectedSolverWindow open: aSolver.
-	
-	aSolver inspect."
 		
 	
 ! !
@@ -383,7 +388,7 @@ window
 	
 	^window! !
 
-!StateDiagram class methodsFor: 'as yet unclassified' stamp: 'DF 12/16/2020 20:34:34'!
+!StateDiagram class methodsFor: 'as yet unclassified' stamp: 'DF 12/19/2020 22:12:31'!
 example
 
 	"self example"
@@ -407,12 +412,10 @@ example
 	aStateDiagram connect: b to: c 	label: 'close'.
 	aStateDiagram connect: a to: c 	label: 'insert'.
 	
-	aStateDiagram layoutDiagram.
-	
 	aStateDiagram asMorph embeddedInZoomingWindowLabeled: 'State Diagram'.
 ! !
 
-!StateDiagram class methodsFor: 'as yet unclassified' stamp: 'DF 12/16/2020 20:35:08'!
+!StateDiagram class methodsFor: 'as yet unclassified' stamp: 'DF 12/19/2020 16:38:49'!
 example2
 
 	"self example2"
@@ -467,12 +470,10 @@ example2
 
 	aStateDiagram connect: abc to: abc 	label: 'a,b,c'.
 	
-	aStateDiagram layoutDiagram.
-	
 	aStateDiagram asMorph embeddedInZoomingWindowLabeled: 'State Diagram'.
 ! !
 
-!StateDiagram class methodsFor: 'as yet unclassified' stamp: 'DF 12/16/2020 20:35:44'!
+!StateDiagram class methodsFor: 'as yet unclassified' stamp: 'DF 12/19/2020 16:38:54'!
 example3
 
 	"self example3"
@@ -486,8 +487,6 @@ example3
 	aStateDiagram addState: a.
 	
 	aStateDiagram connect: a to: a 	label: 'self'.
-	
-	aStateDiagram layoutDiagram.
 	
 	aStateDiagram asMorph embeddedInZoomingWindowLabeled: 'State Diagram'.
 ! !
