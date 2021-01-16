@@ -1,6 +1,6 @@
-'From Cuis 5.0 [latest update: #4426] on 19 December 2020 at 10:24:32 pm'!
+'From Cuis 5.0 [latest update: #4426] on 30 December 2020 at 6:41:23 pm'!
 'Description A library for automatic layout of state machine diagrams'!
-!provides: 'Kleene' 1 6!
+!provides: 'Kleene' 1 8!
 !requires: 'Gaudi' 1 22 nil!
 SystemOrganization addCategory: 'Kleene'!
 
@@ -46,7 +46,7 @@ StateDiagram class
 	instanceVariableNames: ''!
 
 
-!DiagramSelfTransition methodsFor: 'as yet unclassified' stamp: 'DF 12/18/2020 15:27:52'!
+!DiagramSelfTransition methodsFor: 'as yet unclassified' stamp: 'DF 12/21/2020 10:44:51'!
 asMorph
 
 	| alpha anArcMorph aLabelMorph labelPosition xoffset yoffset |
@@ -57,16 +57,16 @@ asMorph
 	
 	labelPosition _ anArcMorph morphLocalBounds center + ((anArcMorph radius@0) rotatedBy: (alpha + 0) degreesToRadians).
 	
-	aLabelMorph _ LabelMorph new contents: label; morphPosition: labelPosition; yourself.
+	aLabelMorph _ LabelMorph new contents: label; yourself.
 	
-	xoffset _ alpha degreesToRadians cos - 1.
+	xoffset _ alpha degreesToRadians cos / 2 - 0.5.
 	
-	yoffset _ alpha degreesToRadians sin. 
+	yoffset _ alpha degreesToRadians sin / 2 - 0.5. 
 
-	aLabelMorph morphPosition: 	aLabelMorph morphPosition + ((xoffset @ yoffset) * aLabelMorph morphExtent)	.
+	aLabelMorph morphPosition: 	labelPosition + ((xoffset @ yoffset) * aLabelMorph morphExtent)	.
 	
 	anArcMorph addMorph: aLabelMorph.
-
+	
 	^anArcMorph ! !
 
 !DiagramSelfTransition methodsFor: 'as yet unclassified' stamp: 'DF 12/16/2020 19:33:00'!
@@ -142,16 +142,21 @@ radius
 radius: aNumber
 	radius _ aNumber! !
 
-!DiagramTransition methodsFor: 'as yet unclassified' stamp: 'DF 12/19/2020 18:07:49'!
+!DiagramTransition methodsFor: 'as yet unclassified' stamp: 'DF 12/21/2020 10:50:22'!
 asMorph
 
-	| aMorph aLabelMorph pos |
+	| aMorph aLabelMorph |
 	
 	aMorph _ SimplePolyLineMorph new.
 	
 	aMorph path: (path collect:[:each | each position ]).
 	
 	aMorph arrow: true; lineWidth:1; color: Color gray.
+
+	aLabelMorph _ LabelMorph new contents: label; morphPosition: labelMagnets anyOne position; yourself.
+	
+	aMorph addMorph: aLabelMorph.
+
 "	
 	pos _ labelMagnets collect:[:each | each position].
 	
@@ -161,23 +166,24 @@ asMorph
 	
 	^aMorph! !
 
-!DiagramTransition methodsFor: 'as yet unclassified' stamp: 'DF 12/15/2020 22:21:01'!
+!DiagramTransition methodsFor: 'as yet unclassified' stamp: 'DF 12/21/2020 10:52:39'!
 buildLabelIn: aSolver attachedTo: aMagnet
 
-	| c d p delta |
-	
-	delta _ 14@0.
+	| c p |
 	
 	labelMagnets add: aMagnet.
 	
-	p _ aMagnet position + (-4@-4 extent: 8@8) atRandom..
+	p _ aMagnet position + (-8@-8 extent: 16@16) atRandom..
 	
 	c _ Magnet charge:35 position: p.
 	
 	aSolver addObject: c.
 
-	aSolver addConstraint: (Spring length:24 strength:1 between: aMagnet and: c).
-		
+	aSolver addConstraint: (Spring length:18 strength:1 between: aMagnet and: c).
+
+	labelMagnets add:	c.
+	
+	"	
 	label size - 1 timesRepeat:[ 
 		
 		d _ Magnet charge: 15 position: p + delta.
@@ -189,9 +195,9 @@ buildLabelIn: aSolver attachedTo: aMagnet
 		
 		c _ d. p _ p + delta ].
 	
-	label size > 1 ifTrue:[labelMagnets add: d].! !
+	label size > 1 ifTrue:[labelMagnets add: d]."! !
 
-!DiagramTransition methodsFor: 'as yet unclassified' stamp: 'DF 12/19/2020 21:56:58'!
+!DiagramTransition methodsFor: 'as yet unclassified' stamp: 'DF 12/21/2020 10:46:35'!
 buildPathIn: aForceSolver
 	
 	| destinationAnchor originAnchor originMagnet midMagnet destinationMagnet direction distance |
@@ -228,7 +234,7 @@ buildPathIn: aForceSolver
 
 	path add: midMagnet.
 
-	"self buildLabelIn: aForceSolver attachedTo: midMagnet."
+	self buildLabelIn: aForceSolver attachedTo: midMagnet.
 		
 	destinationMagnet _ Magnet 	charge:30.0 position: destination position - (direction * origin radius) + ((10 atRandom - 5) @ (10 atRandom -5)).
 
@@ -354,16 +360,18 @@ layoutStates
 	
 	magnets associations do:[:each | each key position: each value position ].! !
 
-!StateDiagram methodsFor: 'as yet unclassified' stamp: 'DF 12/19/2020 18:05:15'!
+!StateDiagram methodsFor: 'as yet unclassified' stamp: 'DF 12/21/2020 09:34:41'!
 layoutTransitions
 
-	| aSolver |
+	| aSolver | 
 	
 	aSolver _ ForceDirectedSolver 	new.
 		
 	transitions do:[:each | each buildPathIn: aSolver ].
 
 	selfTransitions do:[:each | each buildPathIn: aSolver ].
+	
+	aSolver trackProgress.
 	
 	aSolver ensureSeparationBy: 0.25; errorTolerance:0.25; solve: 150.
 
@@ -388,7 +396,7 @@ window
 	
 	^window! !
 
-!StateDiagram class methodsFor: 'as yet unclassified' stamp: 'DF 12/19/2020 22:12:31'!
+!StateDiagram class methodsFor: 'as yet unclassified' stamp: 'DF 12/21/2020 10:55:50'!
 example
 
 	"self example"
@@ -412,10 +420,10 @@ example
 	aStateDiagram connect: b to: c 	label: 'close'.
 	aStateDiagram connect: a to: c 	label: 'insert'.
 	
-	aStateDiagram asMorph embeddedInZoomingWindowLabeled: 'State Diagram'.
+	[aStateDiagram asMorph embeddedInZoomingWindowLabeled: 'State Diagram'] fork
 ! !
 
-!StateDiagram class methodsFor: 'as yet unclassified' stamp: 'DF 12/19/2020 16:38:49'!
+!StateDiagram class methodsFor: 'as yet unclassified' stamp: 'DF 12/21/2020 10:56:14'!
 example2
 
 	"self example2"
@@ -470,7 +478,7 @@ example2
 
 	aStateDiagram connect: abc to: abc 	label: 'a,b,c'.
 	
-	aStateDiagram asMorph embeddedInZoomingWindowLabeled: 'State Diagram'.
+	[aStateDiagram asMorph embeddedInZoomingWindowLabeled: 'State Diagram'] fork.
 ! !
 
 !StateDiagram class methodsFor: 'as yet unclassified' stamp: 'DF 12/19/2020 16:38:54'!
@@ -487,6 +495,52 @@ example3
 	aStateDiagram addState: a.
 	
 	aStateDiagram connect: a to: a 	label: 'self'.
+	
+	aStateDiagram asMorph embeddedInZoomingWindowLabeled: 'State Diagram'.
+! !
+
+!StateDiagram class methodsFor: 'as yet unclassified' stamp: 'DF 12/21/2020 13:56:11'!
+example4
+
+	"self example4"
+	
+	| states aStateDiagram |
+	
+	aStateDiagram _ self new.
+	
+	states _ (1 to: 11) collect:[ :each | DiagramState new radius:15 ; label: each asString; yourself].
+
+	(states at:3) accepting: true.
+	
+	states do:[:each | aStateDiagram addState: each ].
+	
+	aStateDiagram connect: (states at:1) to: (states at:8) 	label: 'write point'.
+
+	aStateDiagram connect: (states at:8) to: (states at:11) 	label: 'skip'.
+
+	aStateDiagram connect: (states at:11) to: (states at:10) 	label: 'move left'.
+	
+	aStateDiagram connect: (states at:10) to: (states at:6) 	label: 'skip'.
+
+	aStateDiagram connect: (states at:6) to: (states at:7) 	label: 'one/0/one'.
+
+	aStateDiagram connect: (states at:6) to: (states at:9) 	label: 'blank/0/blank'.
+	aStateDiagram connect: (states at:6) to: (states at:9) 	label: 'zero/0/zero'.
+	aStateDiagram connect: (states at:6) to: (states at:9) 	label: 'point/0/point'.
+
+	aStateDiagram connect: (states at:7) to: (states at:11) 	label: 'write zero'.
+
+	aStateDiagram connect: (states at:9) to: (states at:5) 	label: 'skip'.
+
+	aStateDiagram connect: (states at:5) to: (states at:4) 	label: 'move right'.
+
+	aStateDiagram connect: (states at:4) to: (states at:2) 	label: 'zero/0/zero'.
+
+	aStateDiagram connect: (states at:2) to: (states at:5) 	label: 'skip'.
+
+	aStateDiagram connect: (states at:4) to: (states at:3) 	label: 'one/0/one'.
+	aStateDiagram connect: (states at:4) to: (states at:3) 	label: 'point/0/point'.
+	aStateDiagram connect: (states at:4) to: (states at:3) 	label: 'blank/0/blank'.
 	
 	aStateDiagram asMorph embeddedInZoomingWindowLabeled: 'State Diagram'.
 ! !
