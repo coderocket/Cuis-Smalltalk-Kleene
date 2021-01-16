@@ -1,6 +1,6 @@
-'From Cuis 5.0 [latest update: #4426] on 30 December 2020 at 6:41:23 pm'!
+'From Cuis 5.0 [latest update: #4426] on 16 January 2021 at 12:43:30 pm'!
 'Description A library for automatic layout of state machine diagrams'!
-!provides: 'Kleene' 1 8!
+!provides: 'Kleene' 1 10!
 !requires: 'Gaudi' 1 22 nil!
 SystemOrganization addCategory: 'Kleene'!
 
@@ -46,7 +46,7 @@ StateDiagram class
 	instanceVariableNames: ''!
 
 
-!DiagramSelfTransition methodsFor: 'as yet unclassified' stamp: 'DF 12/21/2020 10:44:51'!
+!DiagramSelfTransition methodsFor: 'as yet unclassified' stamp: 'DF 1/16/2021 12:42:12'!
 asMorph
 
 	| alpha anArcMorph aLabelMorph labelPosition xoffset yoffset |
@@ -58,6 +58,8 @@ asMorph
 	labelPosition _ anArcMorph morphLocalBounds center + ((anArcMorph radius@0) rotatedBy: (alpha + 0) degreesToRadians).
 	
 	aLabelMorph _ LabelMorph new contents: label; yourself.
+
+	aLabelMorph font: (FontFamily defaultFamilyPointSize: 10).
 	
 	xoffset _ alpha degreesToRadians cos / 2 - 0.5.
 	
@@ -89,13 +91,15 @@ state: aDiagramState
 accepting: aBoolean
 	accepting _ aBoolean! !
 
-!DiagramState methodsFor: 'as yet unclassified' stamp: 'DF 12/15/2020 14:16:42'!
+!DiagramState methodsFor: 'as yet unclassified' stamp: 'DF 1/16/2021 12:41:24'!
 asMorph
 
-	| aMorph aLabelMorph pos |
+	| aMorph aLabelMorph pos color |
 	
 	aLabelMorph _ LabelMorph new contents: label; yourself.
 
+	aLabelMorph font: (FontFamily defaultFamilyPointSize: 10).
+	
 	pos _ (radius * 2) @ (radius * 2) - aLabelMorph measureContents / 2.
 
 	aLabelMorph morphPosition: pos.
@@ -108,13 +112,19 @@ asMorph
 
 	aMorph addMorph: aLabelMorph.
 
-	aMorph color: Color lightYellow; borderWidth: 2; borderColor: Color veryLightGray.
+	color _ initial ifTrue:[ Color lightGreen ] ifFalse:[ Color lightYellow ].
+	
+	aMorph color: color; borderWidth: 2; borderColor: Color veryLightGray.
 	
 	aMorph morphExtent: (radius * 2) @ (radius * 2) ; morphPosition: position - (radius @ radius).
 
 	^aMorph.	
 	
 ! !
+
+!DiagramState methodsFor: 'as yet unclassified' stamp: 'DF 1/16/2021 12:05:49'!
+initial: aBoolean
+	initial _ aBoolean! !
 
 !DiagramState methodsFor: 'as yet unclassified' stamp: 'DF 12/13/2020 15:03:05'!
 initialize
@@ -142,7 +152,7 @@ radius
 radius: aNumber
 	radius _ aNumber! !
 
-!DiagramTransition methodsFor: 'as yet unclassified' stamp: 'DF 12/21/2020 10:50:22'!
+!DiagramTransition methodsFor: 'as yet unclassified' stamp: 'DF 1/16/2021 12:42:01'!
 asMorph
 
 	| aMorph aLabelMorph |
@@ -155,6 +165,8 @@ asMorph
 
 	aLabelMorph _ LabelMorph new contents: label; morphPosition: labelMagnets anyOne position; yourself.
 	
+	aLabelMorph font: (FontFamily defaultFamilyPointSize: 10).
+
 	aMorph addMorph: aLabelMorph.
 
 "	
@@ -288,7 +300,7 @@ origin: aDiagramState
 addState: aDiagramState
 	states add: aDiagramState.! !
 
-!StateDiagram methodsFor: 'as yet unclassified' stamp: 'DF 12/19/2020 17:09:00'!
+!StateDiagram methodsFor: 'as yet unclassified' stamp: 'DF 1/15/2021 20:50:35'!
 asMorph
 
 	| aMorph |
@@ -323,7 +335,7 @@ initialize
 	transitions _ Set new.
 	selfTransitions _ Set new.! !
 
-!StateDiagram methodsFor: 'as yet unclassified' stamp: 'DF 12/19/2020 16:53:49'!
+!StateDiagram methodsFor: 'as yet unclassified' stamp: 'DF 1/15/2021 20:50:41'!
 layoutDiagram
 
 	self layoutStates ; layoutTransitions.
@@ -331,7 +343,7 @@ layoutDiagram
 	
 	! !
 
-!StateDiagram methodsFor: 'as yet unclassified' stamp: 'DF 12/19/2020 22:15:54'!
+!StateDiagram methodsFor: 'as yet unclassified' stamp: 'DF 1/15/2021 21:10:09'!
 layoutStates
 
 	| magnets constraints aSolver |
@@ -356,11 +368,11 @@ layoutStates
 	
 	constraints do:[:each | aSolver addConstraint: each].
 	
-	aSolver ensureSeparationBy: 15 * 3; errorTolerance: 0.05; solve: 150.
+	aSolver ensureSeparationBy: 15 * 3; errorTolerance: 0.05; solve: 250.
 	
 	magnets associations do:[:each | each key position: each value position ].! !
 
-!StateDiagram methodsFor: 'as yet unclassified' stamp: 'DF 12/21/2020 09:34:41'!
+!StateDiagram methodsFor: 'as yet unclassified' stamp: 'DF 1/15/2021 20:58:04'!
 layoutTransitions
 
 	| aSolver | 
@@ -373,7 +385,7 @@ layoutTransitions
 	
 	aSolver trackProgress.
 	
-	aSolver ensureSeparationBy: 0.25; errorTolerance:0.25; solve: 150.
+	aSolver ensureSeparationBy: 0.25; errorTolerance:0.25; solve: 15.
 
 		
 	
