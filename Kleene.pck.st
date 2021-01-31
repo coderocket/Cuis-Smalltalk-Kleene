@@ -1,6 +1,6 @@
-'From Cuis 5.0 [latest update: #4526] on 31 January 2021 at 4:30:19 pm'!
+'From Cuis 5.0 [latest update: #4526] on 31 January 2021 at 6:32:29 pm'!
 'Description A library for automatic layout of state machine diagrams'!
-!provides: 'Kleene' 1 11!
+!provides: 'Kleene' 1 13!
 !requires: 'Gaudi' 1 22 nil!
 SystemOrganization addCategory: 'Kleene'!
 
@@ -343,14 +343,16 @@ layoutDiagram
 	
 	! !
 
-!StateDiagram methodsFor: 'as yet unclassified' stamp: 'DF 1/31/2021 16:27:44'!
+!StateDiagram methodsFor: 'as yet unclassified' stamp: 'DF 1/31/2021 18:27:56'!
 layoutStates
 
-	| magnets constraints aSolver |
+	| magnets constraints aSolver factor |
 		
 	magnets _ Dictionary new.
 	
-	states do:[:each | magnets at: each put: (Magnet charge: each radius * 12 position: 2000 atRandom @ 2000 atRandom) ].
+	factor _ states size raisedTo: 0.5.
+	
+	states do:[:each | magnets at: each put: (Magnet charge: each radius * 12 position: (226 * factor) asInteger atRandom @ (169) asInteger atRandom) ].
 	
 	constraints _ Dictionary new.
 	
