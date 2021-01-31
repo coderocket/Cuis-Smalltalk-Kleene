@@ -1,4 +1,4 @@
-'From Cuis 5.0 [latest update: #4526] on 31 January 2021 at 4:11:15 pm'!
+'From Cuis 5.0 [latest update: #4526] on 31 January 2021 at 4:30:19 pm'!
 'Description A library for automatic layout of state machine diagrams'!
 !provides: 'Kleene' 1 11!
 !requires: 'Gaudi' 1 22 nil!
@@ -300,7 +300,7 @@ origin: aDiagramState
 addState: aDiagramState
 	states add: aDiagramState.! !
 
-!StateDiagram methodsFor: 'as yet unclassified' stamp: 'DF 1/31/2021 16:09:25'!
+!StateDiagram methodsFor: 'as yet unclassified' stamp: 'DF 1/31/2021 14:48:13'!
 asMorph
 
 	| aMorph |
@@ -335,7 +335,7 @@ initialize
 	transitions _ Set new.
 	selfTransitions _ Set new.! !
 
-!StateDiagram methodsFor: 'as yet unclassified' stamp: 'DF 1/31/2021 16:09:18'!
+!StateDiagram methodsFor: 'as yet unclassified' stamp: 'DF 1/31/2021 14:48:20'!
 layoutDiagram
 
 	self layoutStates ; layoutTransitions.
@@ -343,14 +343,14 @@ layoutDiagram
 	
 	! !
 
-!StateDiagram methodsFor: 'as yet unclassified' stamp: 'DF 1/31/2021 16:08:39'!
+!StateDiagram methodsFor: 'as yet unclassified' stamp: 'DF 1/31/2021 16:27:44'!
 layoutStates
 
 	| magnets constraints aSolver |
 		
 	magnets _ Dictionary new.
 	
-	states do:[:each | magnets at: each put: (Magnet charge: each radius * 10 position: 2000 atRandom @ 2000 atRandom) ].
+	states do:[:each | magnets at: each put: (Magnet charge: each radius * 12 position: 2000 atRandom @ 2000 atRandom) ].
 	
 	constraints _ Dictionary new.
 	
@@ -360,7 +360,7 @@ layoutStates
 				ifPresent:[ :aConstraint | 
 					aConstraint length: (aConstraint length max: each label size) ]
 				ifAbsent:[constraints at: each key 
-					put: (Spring length: 180  strength: 0.10 between: (magnets at: each origin) and: (magnets at: each destination)) ] ].
+					put: (Spring length: 180  strength: 0.08 between: (magnets at: each origin) and: (magnets at: each destination)) ] ].
 		
 	aSolver _ ForceDirectedSolver 	new.
 	
@@ -370,7 +370,7 @@ layoutStates
 	
 	aSolver trackProgress.
 
-	aSolver ensureSeparationBy: 15 * 3; errorTolerance: 0.05 * magnets size; solve: 550.
+	aSolver ensureSeparationBy: 15 * 2; errorTolerance: 0.025 * magnets size; solve: 550.
 	
 	magnets associations do:[:each | each key position: each value position ].! !
 
