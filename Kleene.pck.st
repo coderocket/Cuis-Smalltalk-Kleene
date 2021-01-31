@@ -1,6 +1,6 @@
-'From Cuis 5.0 [latest update: #4426] on 16 January 2021 at 12:43:30 pm'!
+'From Cuis 5.0 [latest update: #4526] on 31 January 2021 at 4:11:15 pm'!
 'Description A library for automatic layout of state machine diagrams'!
-!provides: 'Kleene' 1 10!
+!provides: 'Kleene' 1 11!
 !requires: 'Gaudi' 1 22 nil!
 SystemOrganization addCategory: 'Kleene'!
 
@@ -300,7 +300,7 @@ origin: aDiagramState
 addState: aDiagramState
 	states add: aDiagramState.! !
 
-!StateDiagram methodsFor: 'as yet unclassified' stamp: 'DF 1/15/2021 20:50:35'!
+!StateDiagram methodsFor: 'as yet unclassified' stamp: 'DF 1/31/2021 16:09:25'!
 asMorph
 
 	| aMorph |
@@ -335,7 +335,7 @@ initialize
 	transitions _ Set new.
 	selfTransitions _ Set new.! !
 
-!StateDiagram methodsFor: 'as yet unclassified' stamp: 'DF 1/15/2021 20:50:41'!
+!StateDiagram methodsFor: 'as yet unclassified' stamp: 'DF 1/31/2021 16:09:18'!
 layoutDiagram
 
 	self layoutStates ; layoutTransitions.
@@ -343,14 +343,14 @@ layoutDiagram
 	
 	! !
 
-!StateDiagram methodsFor: 'as yet unclassified' stamp: 'DF 1/15/2021 21:10:09'!
+!StateDiagram methodsFor: 'as yet unclassified' stamp: 'DF 1/31/2021 16:08:39'!
 layoutStates
 
 	| magnets constraints aSolver |
 		
 	magnets _ Dictionary new.
 	
-	states do:[:each | magnets at: each put: (Magnet charge: each radius * 10 position: 640 atRandom @ 480 atRandom) ].
+	states do:[:each | magnets at: each put: (Magnet charge: each radius * 10 position: 2000 atRandom @ 2000 atRandom) ].
 	
 	constraints _ Dictionary new.
 	
@@ -360,7 +360,7 @@ layoutStates
 				ifPresent:[ :aConstraint | 
 					aConstraint length: (aConstraint length max: each label size) ]
 				ifAbsent:[constraints at: each key 
-					put: (Spring length: 150  strength: 0.15 between: (magnets at: each origin) and: (magnets at: each destination)) ] ].
+					put: (Spring length: 180  strength: 0.10 between: (magnets at: each origin) and: (magnets at: each destination)) ] ].
 		
 	aSolver _ ForceDirectedSolver 	new.
 	
@@ -368,11 +368,13 @@ layoutStates
 	
 	constraints do:[:each | aSolver addConstraint: each].
 	
-	aSolver ensureSeparationBy: 15 * 3; errorTolerance: 0.05; solve: 250.
+	aSolver trackProgress.
+
+	aSolver ensureSeparationBy: 15 * 3; errorTolerance: 0.05 * magnets size; solve: 550.
 	
 	magnets associations do:[:each | each key position: each value position ].! !
 
-!StateDiagram methodsFor: 'as yet unclassified' stamp: 'DF 1/15/2021 20:58:04'!
+!StateDiagram methodsFor: 'as yet unclassified' stamp: 'DF 1/31/2021 14:58:48'!
 layoutTransitions
 
 	| aSolver | 
@@ -385,7 +387,7 @@ layoutTransitions
 	
 	aSolver trackProgress.
 	
-	aSolver ensureSeparationBy: 0.25; errorTolerance:0.25; solve: 15.
+	aSolver ensureSeparationBy: 0.25; errorTolerance:0.25 * transitions size; solve: 15.
 
 		
 	
