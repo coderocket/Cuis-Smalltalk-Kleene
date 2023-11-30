@@ -1,6 +1,6 @@
-'From Cuis 6.0 [latest update: #6053] on 29 November 2023 at 7:40:55 pm'!
+'From Cuis 6.0 [latest update: #6053] on 30 November 2023 at 9:35:35 pm'!
 'Description '!
-!provides: 'Kleene' 1 2!
+!provides: 'Kleene' 1 4!
 !requires: 'Gaudi' 1 0 nil!
 SystemOrganization addCategory: #Kleene!
 
@@ -476,19 +476,15 @@ radius
 radius: aNumber
 	radius _ aNumber! !
 
-!DiagramState methodsFor: 'morphic' stamp: 'DF 11/29/2023 19:02:05'!
+!DiagramState methodsFor: 'morphic' stamp: 'DF 11/29/2023 20:04:40'!
 asMorph: aTransform with: properties 
 
 	| aStateMorph color scale |
 
-	"scale := (aTransform transform: 0@0) corner: (aTransform transform: (radius * 2) @ (radius * 2))."
-	
 	scale := aTransform scale * 2 * radius.
 
 	aStateMorph := StateMorph new.
 	
-	"aStateMorph morphExtent: scale * ((radius * 2) @ (radius * 2)) ; morphPosition: (aTransform transform:position - (radius @ radius))."
-
 	aStateMorph morphExtent: scale @ scale ; morphPosition: (aTransform transform: position - (radius@radius)).
 	
 	color := initial ifTrue:[ properties at:#initial_state_morph_color ] ifFalse:[ properties at:#state_morph_color].
@@ -940,7 +936,7 @@ setProperty: aSymbol to: anObject
 title: aString
 	title _ aString! !
 
-!StateDiagram methodsFor: 'accessing' stamp: 'DF 11/29/2023 19:10:48'!
+!StateDiagram methodsFor: 'accessing' stamp: 'DF 11/30/2023 20:18:37'!
 window
 
 	"answers the smallest rectangle that holds all the states and transitions in the system"
@@ -956,7 +952,7 @@ window
 	
 	radius := (states collect:[:each | each radius]) max.
 	
-	window := window expandBy: (radius @ radius) * 1.5.
+	window := window expandBy: (radius @ radius) * 3.
 	
 	^window supremum! !
 
