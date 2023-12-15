@@ -1,9 +1,19 @@
-'From Cuis 6.0 [latest update: #6053] on 30 November 2023 at 9:35:35 pm'!
+'From Cuis 6.0 [latest update: #6053] on 15 December 2023 at 10:28:06 pm'!
 'Description '!
-!provides: 'Kleene' 1 4!
+!provides: 'Kleene' 1 9!
 !requires: 'Gaudi' 1 0 nil!
 SystemOrganization addCategory: #Kleene!
 
+
+!classDefinition: #KleeneViewerMorph category: #Kleene!
+GaudiViewerMorph subclass: #KleeneViewerMorph
+	instanceVariableNames: ''
+	classVariableNames: ''
+	poolDictionaries: ''
+	category: 'Kleene'!
+!classDefinition: 'KleeneViewerMorph class' category: #Kleene!
+KleeneViewerMorph class
+	instanceVariableNames: ''!
 
 !classDefinition: #ArcMorph category: #Kleene!
 BoxedMorph subclass: #ArcMorph
@@ -35,6 +45,16 @@ BoxedMorph subclass: #StateMorph
 StateMorph class
 	instanceVariableNames: ''!
 
+!classDefinition: #WhiteboardMorph category: #Kleene!
+BoxedMorph subclass: #WhiteboardMorph
+	instanceVariableNames: 'shapes whiteboard'
+	classVariableNames: ''
+	poolDictionaries: ''
+	category: 'Kleene'!
+!classDefinition: 'WhiteboardMorph class' category: #Kleene!
+WhiteboardMorph class
+	instanceVariableNames: ''!
+
 !classDefinition: #StateDiagramTest category: #Kleene!
 TestCase subclass: #StateDiagramTest
 	instanceVariableNames: ''
@@ -43,6 +63,16 @@ TestCase subclass: #StateDiagramTest
 	category: 'Kleene'!
 !classDefinition: 'StateDiagramTest class' category: #Kleene!
 StateDiagramTest class
+	instanceVariableNames: ''!
+
+!classDefinition: #KleeneViewer category: #Kleene!
+GaudiViewer subclass: #KleeneViewer
+	instanceVariableNames: ''
+	classVariableNames: ''
+	poolDictionaries: ''
+	category: 'Kleene'!
+!classDefinition: 'KleeneViewer class' category: #Kleene!
+KleeneViewer class
 	instanceVariableNames: ''!
 
 !classDefinition: #DiagramSelfTransition category: #Kleene!
@@ -57,7 +87,7 @@ DiagramSelfTransition class
 
 !classDefinition: #DiagramState category: #Kleene!
 Object subclass: #DiagramState
-	instanceVariableNames: 'adj position radius accepting initial label'
+	instanceVariableNames: 'adj position accepting initial label radius'
 	classVariableNames: ''
 	poolDictionaries: ''
 	category: 'Kleene'!
@@ -83,6 +113,16 @@ Object subclass: #StateDiagram
 	category: 'Kleene'!
 !classDefinition: 'StateDiagram class' category: #Kleene!
 StateDiagram class
+	instanceVariableNames: ''!
+
+!classDefinition: #Whiteboard category: #Kleene!
+Object subclass: #Whiteboard
+	instanceVariableNames: 'window viewport transform'
+	classVariableNames: ''
+	poolDictionaries: ''
+	category: 'Kleene'!
+!classDefinition: 'Whiteboard class' category: #Kleene!
+Whiteboard class
 	instanceVariableNames: ''!
 
 
@@ -298,18 +338,62 @@ requiresVectorCanvas
 textColor: aColor
 	textColor _ aColor! !
 
-!StateDiagramTest methodsFor: 'as yet unclassified' stamp: 'DF 3/6/2023 20:15:50'!
+!WhiteboardMorph methodsFor: 'as yet unclassified' stamp: 'DF 12/15/2023 13:35:35'!
+addShape: aShape
+	shapes add: aShape! !
+
+!WhiteboardMorph methodsFor: 'as yet unclassified' stamp: 'DF 12/15/2023 13:52:52'!
+drawOn: aCanvas
+
+	super drawOn: aCanvas.
+	
+	shapes do:[:each | each drawOn: whiteboard canvas: aCanvas ] ! !
+
+!WhiteboardMorph methodsFor: 'as yet unclassified' stamp: 'DF 12/15/2023 13:49:52'!
+initialize
+
+	super initialize.
+	shapes := OrderedCollection new.! !
+
+!WhiteboardMorph methodsFor: 'as yet unclassified' stamp: 'DF 12/15/2023 21:47:32'!
+removeAllShapes
+
+	shapes removeAll! !
+
+!WhiteboardMorph methodsFor: 'as yet unclassified' stamp: 'DF 12/15/2023 15:12:57'!
+requiresVectorCanvas
+	^true! !
+
+!WhiteboardMorph methodsFor: 'as yet unclassified' stamp: 'DF 12/15/2023 13:36:09'!
+whiteboard: aWhiteboard
+	whiteboard := aWhiteboard! !
+
+!WhiteboardMorph methodsFor: 'as yet unclassified' stamp: 'DF 12/15/2023 17:16:11'!
+zoomIn
+
+	whiteboard zoomIn. 
+	
+	self redrawNeeded.! !
+
+!WhiteboardMorph methodsFor: 'as yet unclassified' stamp: 'DF 12/15/2023 17:16:18'!
+zoomOut
+
+	whiteboard zoomOut.
+	
+	self redrawNeeded.! !
+
+!StateDiagramTest methodsFor: 'as yet unclassified' stamp: 'DF 12/14/2023 21:07:00'!
 testIsConnected
 
 	| a b c aStateDiagram |
 	
-	a _ DiagramState new radius:1 ; label:'a'; yourself.
+	a := DiagramState new label:'a'; yourself.
 	
-	b _ DiagramState new radius:1 ; label:'b' ; yourself.
+	b := DiagramState new label:'b' ; yourself.
 	
-	c _ DiagramState new radius:1 ; label:'c';  accepting: true; yourself.
+	c := DiagramState new label:'c';  accepting: true; yourself.
 
-	aStateDiagram _ StateDiagram new.
+	aStateDiagram := StateDiagram new.
 
 	aStateDiagram addState: a; addState:b ; addState:c.
 
@@ -325,18 +409,18 @@ testIsConnected
 	self assert: aStateDiagram isConnected
 	! !
 
-!StateDiagramTest methodsFor: 'as yet unclassified' stamp: 'DF 3/6/2023 20:15:54'!
+!StateDiagramTest methodsFor: 'as yet unclassified' stamp: 'DF 12/14/2023 21:07:12'!
 testNotConnected
 
 	| a b c aStateDiagram |
 	
-	a _ DiagramState new radius:1 ; label:'a'; yourself.
+	a := DiagramState new label:'a'; yourself.
 	
-	b _ DiagramState new radius:1 ; label:'b' ; yourself.
+	b := DiagramState new label:'b' ; yourself.
 	
-	c _ DiagramState new radius:1 ; label:'c';  accepting: true; yourself.
+	c := DiagramState new label:'c';  accepting: true; yourself.
 
-	aStateDiagram _ StateDiagram new.
+	aStateDiagram := StateDiagram new.
 		
 	aStateDiagram addState: a; addState:b ; addState:c.
 
@@ -350,6 +434,52 @@ testNotConnected
 	self assert: aStateDiagram isConnected equals: false
 	! !
 
+!KleeneViewer class methodsFor: 'as yet unclassified' stamp: 'DF 12/15/2023 21:45:24'!
+open: model label: aString
+
+	| vport aWhiteboard aWhiteboardMorph aScrollPane aColumnMorph aRowMorph  aWindow |
+
+	model layoutDiagram.
+
+	vport := 	0@0 extent: 1024 @ 1024.
+	aWhiteboard := Whiteboard new window: model window viewport: (vport aligned: vport center with: 1500@1500) ; yourself.
+	
+	aWhiteboardMorph := WhiteboardMorph new.
+	
+	aWhiteboardMorph whiteboard: aWhiteboard; color: Color veryVeryLightGray.
+
+	aWhiteboardMorph morphExtent: 3000@2000.
+	
+	aScrollPane := GaudiViewerMorph new.
+	
+	aScrollPane model: model ; scroller: aWhiteboardMorph.
+	
+	aColumnMorph := LayoutMorph newColumn.
+	
+	aColumnMorph addMorph: (self buildToolBar: aWhiteboardMorph).
+	
+	aRowMorph := LayoutMorph newRow.
+	
+	aRowMorph addMorph: aScrollPane proportionalWidth:0.8.
+	
+	aRowMorph addMorph: (LabelGroup with: {
+		'radius' -> (SimpleNumberEntryMorph positiveFloatDefault: model getStateRadius maxNumChars:4 :: valueUpdator: [ :value | model setStateRadius: value]; yourself). 
+		'charge' -> (SimpleNumberEntryMorph positiveFloatDefault: model getStateCharge maxNumChars:4 :: valueUpdator: [ :value | model setStateCharge: value]; yourself). 
+		'length' -> (SimpleNumberEntryMorph positiveFloatDefault: model getTransitionLength maxNumChars:4 :: valueUpdator:[ :value | model setTransitionLength: value]; yourself). 
+		'strength' -> (SimpleNumberEntryMorph positiveFloatDefault: model getTransitionStrength maxNumChars:4 :: valueUpdator:[ :value | model setTransitionLength: value]; yourself).
+		'debug' -> (CheckButtonMorph new selected: false  ; yourself).
+	}) proportionalWidth:0.2.
+	
+	aColumnMorph addMorph: aRowMorph.
+	
+	aWindow := aColumnMorph embeddedInMorphicWindowLabeled: 'Kleene Viewer: ', model defaultDiagramName.
+
+	aWindow openInWorld.
+	
+	model drawOn: aWhiteboardMorph.
+
+! !
+
 !DiagramSelfTransition methodsFor: 'accessing' stamp: 'DF 12/15/2020 18:49:08'!
 label: aString
 	label _ aString! !
@@ -362,26 +492,28 @@ state
 state: aDiagramState
 	state _ aDiagramState! !
 
-!DiagramSelfTransition methodsFor: 'morphic' stamp: 'DF 5/3/2022 09:13:48'!
+!DiagramSelfTransition methodsFor: 'morphic' stamp: 'DF 12/14/2023 21:04:37'!
 asMorph: aTransform with: properties 
 
-	| alpha anArcMorph extent anArrowMorph origin aLabelMorph |
+	| alpha anArcMorph extent anArrowMorph origin aLabelMorph radius |
 	
-	alpha _ (magnet position - state position) degrees.
+	radius := properties at:#state_radius.
+	
+	alpha := (magnet position - state position) degrees.
 		
-	extent _ aTransform scale * 2 * (state radius @ state radius).
+	extent := aTransform scale * 2 * (radius @ radius).
 	
-	anArcMorph _ ArcMorph new angle:270 ; direction: alpha + 45; morphExtent: extent; lineWidth:(properties at: #transition_morph_width); color: (properties at:#transition_morph_color); yourself.
+	anArcMorph := ArcMorph new angle:270 ; direction: alpha + 45; morphExtent: extent; lineWidth:(properties at: #transition_morph_width); color: (properties at:#transition_morph_color); yourself.
 	
-	origin _ (anArcMorph start + anArcMorph end) / 2.
+	origin := (anArcMorph start + anArcMorph end) / 2.
 	
 	anArcMorph morphPosition: 	(aTransform transform: magnet position) - origin.
 
-	anArrowMorph _ SimpleLineMorph new lineWidth:(properties at: #transition_morph_width) ; color: (properties at:#transition_morph_color); startPoint: anArcMorph end; endPoint: (Point r:1 degrees: alpha+ 60 + 180) ; arrow: true; arrowHeadLength: (properties at: #transition_morph_arrow_length); yourself.
+	anArrowMorph := SimpleLineMorph new lineWidth:(properties at: #transition_morph_width) ; color: (properties at:#transition_morph_color); startPoint: anArcMorph end; endPoint: (Point r:1 degrees: alpha+ 60 + 180) ; arrow: true; arrowHeadLength: (properties at: #transition_morph_arrow_length); yourself.
 	
 	anArcMorph addMorph: anArrowMorph.
 	
-	aLabelMorph _ LabelMorph new contents: label ; yourself.
+	aLabelMorph := LabelMorph new contents: label ; yourself.
 	
 	aLabelMorph font: (properties at: #transition_label_font).
 	
@@ -394,48 +526,52 @@ asMorph: aTransform with: properties
 	
 	^anArcMorph ! !
 
-!DiagramSelfTransition methodsFor: 'morphic' stamp: 'DF 3/7/2023 23:40:02'!
+!DiagramSelfTransition methodsFor: 'morphic' stamp: 'DF 12/14/2023 21:01:50'!
 layoutIn: aForceSolver around: magnets with: properties 
 
-	| anchor spring index maxa maxi a p |
+	| radius anchor spring index maxa maxi a p |
 
-	index _ 1.
+	radius := properties at:#state_radius.
+	
+	index := 1.
 
-	maxa _ 0.
-	maxi _ 1.
+	maxa := 0.
+	maxi := 1.
 			
 	[index < magnets size] 
 		whileTrue:[	
-			a _ ((magnets at:index + 1) position theta - (magnets at:index) position theta) abs.
+			a := ((magnets at:index + 1) position theta - (magnets at:index) position theta) abs.
 			maxa < a ifTrue:[
-				maxi _ index. maxa _ a].
-			index _ index + 1 ].
+				maxi := index. maxa := a].
+			index := index + 1 ].
 	
-	a _ 	((magnets at: 1) position theta - (magnets at:index) position theta) abs.
+	a := 	((magnets at: 1) position theta - (magnets at:index) position theta) abs.
 	maxa < a ifTrue:[
-		maxi _ index. maxa _ a].
+		maxi := index. maxa := a].
 	
-	p _ Point rho: state radius theta: (magnets at:maxi) position theta + (maxa / 2).
+	p := Point rho: radius theta: (magnets at:maxi) position theta + (maxa / 2).
 	
-	anchor _ Anchor new position: state position; yourself.
+	anchor := Anchor new position: state position; yourself.
 	
-	magnet _ Magnet new charge: (properties at:#self_transition_magnet_charge); position: state position + (p) ; yourself.
+	magnet := Magnet new charge: (properties at:#self_transition_magnet_charge); position: state position + (p) ; yourself.
 
-	spring _ Spring length: (properties at:#self_transition_spring_length_factor) * state radius strength: (properties at:#self_transition_spring_strength) between: anchor and: magnet.
+	spring := Spring length: (properties at:#self_transition_spring_length_factor) * radius strength: (properties at:#self_transition_spring_strength) between: anchor and: magnet.
 	
 	aForceSolver addObject: anchor; addObject: magnet; addConstraint: spring.
 ! !
 
-!DiagramSelfTransition methodsFor: 'morphic' stamp: 'DF 3/7/2023 22:29:44'!
+!DiagramSelfTransition methodsFor: 'morphic' stamp: 'DF 12/14/2023 21:05:07'!
 layoutIn: aForceSolver with: properties 
 
-	| anchor spring |
-	
-	anchor _ Anchor new position: state position; yourself.
-	
-	magnet _ Magnet new charge: (properties at:#self_transition_magnet_charge); position: state position + (state radius @ 0) ; yourself.
+	| anchor spring radius |
 
-	spring _ Spring length: (properties at:#self_transition_spring_length_factor) * state radius strength: (properties at:#self_transition_spring_strength) between: anchor and: magnet.
+	radius := properties at:#state_radius.
+		
+	anchor := Anchor new position: state position; yourself.
+	
+	magnet := Magnet new charge: (properties at:#self_transition_magnet_charge); position: state position + ( radius @ 0) ; yourself.
+
+	spring := Spring length: (properties at:#self_transition_spring_length_factor) *  radius strength: (properties at:#self_transition_spring_strength) between: anchor and: magnet.
 	
 	aForceSolver addObject: anchor; addObject: magnet; addConstraint: spring.
 ! !
@@ -468,19 +604,17 @@ position
 position: aPoint
 	position _ aPoint! !
 
-!DiagramState methodsFor: 'accessing' stamp: 'DF 12/13/2020 14:07:15'!
-radius
-	^radius! !
-
-!DiagramState methodsFor: 'accessing' stamp: 'DF 12/13/2020 14:06:49'!
+!DiagramState methodsFor: 'accessing' stamp: 'DF 12/15/2023 14:44:46'!
 radius: aNumber
-	radius _ aNumber! !
+	radius := aNumber! !
 
-!DiagramState methodsFor: 'morphic' stamp: 'DF 11/29/2023 20:04:40'!
+!DiagramState methodsFor: 'morphic' stamp: 'DF 12/15/2023 12:10:56'!
 asMorph: aTransform with: properties 
 
-	| aStateMorph color scale |
+	| aStateMorph color scale radius |
 
+	radius := properties at:#state_radius.
+	
 	scale := aTransform scale * 2 * radius.
 
 	aStateMorph := StateMorph new.
@@ -499,13 +633,41 @@ asMorph: aTransform with: properties
 	
 ! !
 
-!DiagramState methodsFor: 'initialization' stamp: 'DF 12/4/2021 16:00:59'!
+!DiagramState methodsFor: 'initialization' stamp: 'DF 12/15/2023 14:44:18'!
 initialize
 
-	adj _ Set new.
-	accepting _ false.
-	initial _ false.
+	adj := Set new.
+	accepting := false.
+	initial := false.
+	radius := 1.
 	
+! !
+
+!DiagramState methodsFor: 'shapes' stamp: 'DF 12/15/2023 22:12:30'!
+drawOn: aWhiteboard canvas: aCanvas
+
+	| font |
+		
+	aWhiteboard drawOn: aCanvas circleCenter: position radius: radius borderWidth: 1 borderColor: Color black fillColor: Color yellow.
+	
+	accepting ifTrue:[
+		aWhiteboard drawOn: aCanvas circleCenter: position radius: 0.8 * radius borderWidth: 1 borderColor: Color black fillColor: Color yellow.
+	].
+
+	initial ifTrue:[ | p1 p2 |
+	
+		p2 := position - (radius@0).
+
+		p1 := p2 - (Point r:radius degrees: 30).
+	
+		aWhiteboard drawOn: aCanvas  lineFrom: p1 to: p2 width:3 color: Color red.
+		
+		aWhiteboard drawOn: aCanvas arrowHead: 8 at: p2 direction: (p2 - p1) width: 3 color: Color red
+	].
+
+	font :=FontFamily defaultFamilyPointSize:9.
+		
+	aWhiteboard drawOn: aCanvas string: label at: position font: font color: Color black.
 ! !
 
 !DiagramTransition methodsFor: 'initialization' stamp: 'DF 12/3/2021 19:43:04'!
@@ -525,7 +687,7 @@ asMorph: aTransform with: properties
 	
 	! !
 
-!DiagramTransition methodsFor: 'morphic' stamp: 'DF 11/29/2023 18:36:53'!
+!DiagramTransition methodsFor: 'morphic' stamp: 'DF 12/14/2023 19:55:00'!
 pathAt: index asMorph: aTransform with: properties 
 
 	| aMorph mpath rect aLabelMorph direction theta length d delta |
@@ -561,7 +723,7 @@ pathAt: index asMorph: aTransform with: properties
 	aMorph addMorph: aLabelMorph.
 
 	(properties at: #debug_labels)	 ifTrue:[ | aLineMorph |
-		aLineMorph := SimpleLineMorph new startPoint: (mpath at:2) + (((mpath at:3) - (mpath at:2)) * (properties at:#transition_label_relative_position)) - rect origin ; endPoint: (direction normal * length) - rect origin; lineWidth: 0.5;yourself.
+		aLineMorph := SimpleLineMorph new startPoint: (mpath at:2) + (((mpath at:3) - (mpath at:2)) * (properties at:#transition_label_relative_position)) - rect origin ; endPoint: (direction normal * length) ; lineWidth: 3;yourself.
 	
 		aLineMorph color: Color red.
 	
@@ -577,48 +739,54 @@ layoutIn: aForceSolver with: properties
 		self layoutPathAt: index In: aForceSolver with: properties].
 ! !
 
-!DiagramTransition methodsFor: 'layout' stamp: 'DF 12/5/2021 17:43:17'!
+!DiagramTransition methodsFor: 'layout' stamp: 'DF 12/15/2023 11:42:51'!
 layoutPathAt: index In: aForceSolver with: properties 
 	
-	| aPath destinationAnchor originAnchor originMagnet midMagnet destinationMagnet direction distance offset alpha beta centralOffset |
+	| radius aPath destinationAnchor originAnchor originMagnet midMagnet destinationMagnet direction distance offset alpha beta centralOffset charge strength |
 	
-	offset _ index - ((paths size + 1) / 2).	
+	radius := properties at:#state_radius.
+	
+	charge := 0.015 * (properties at:#state_charge).
+	
+	strength := 0.3 * (properties at:#state_layout_spring_strength).
+	
+	offset := index - ((paths size + 1) / 2).	
 
-	aPath _ paths at:index.
+	aPath := paths at:index.
 	
 	aPath removeAll.
 	
-	direction _ destination position - origin position.
+	direction := destination position - origin position.
 
-	distance _ direction r.
+	distance := direction r.
 	
-	direction _ direction normalized.
+	direction := direction normalized.
 		
 	"we create an anchor for the origin and destination positions"
 	
-	originAnchor _ Anchor position: origin position.
+	originAnchor := Anchor position: origin position.
 
 	aForceSolver addObject: originAnchor.
 	
-	destinationAnchor _ Anchor position: destination position.
+	destinationAnchor := Anchor position: destination position.
 
 	aForceSolver addObject: destinationAnchor.
 
 	" each anchor is connected to a stick (a very strong spring) with a radius that is equal to the radius of the origin/destination"
 
-	alpha _ (offset = 0) ifTrue:[ 3 ] ifFalse: [(properties at:#transition_origin_separation_angle) * offset ].
+	alpha := (offset = 0) ifTrue:[ 3 ] ifFalse: [(properties at:#transition_origin_separation_angle) * offset ].
 	
-	originMagnet _ Magnet 	charge: (properties at: #transition_origin_magnet_charge) position: origin position + ((direction * origin radius) rotatedBy: alpha degreesToRadians).
+	originMagnet := Magnet 	charge: charge position: origin position + ((direction * radius) rotatedBy: alpha degreesToRadians).
 
 	aPath add: originMagnet.
 		
 	aForceSolver addObject: originMagnet.
 	
-	aForceSolver addConstraint: (Spring length: origin radius strength:(properties at: #transition_anchor_spring_strength) between:originAnchor and: originMagnet).
+	aForceSolver addConstraint: (Spring length: radius strength:10 * strength between:originAnchor and: originMagnet).
 
-	centralOffset _ (offset = 0) ifTrue:[ 0.125 ] ifFalse:[0].
+	centralOffset := (offset = 0) ifTrue:[ 0.125 ] ifFalse:[0].
 
-	midMagnet _ Magnet 	charge: (properties at:#transition_midpoint_magnet_charge) position: origin position + (direction * distance / 2) + (direction normal * (offset + centralOffset) ).
+	midMagnet := Magnet 	charge: charge position: origin position + (direction * distance / 2 ) + (direction normal * (offset + centralOffset) ).
 
 	aForceSolver addObject: midMagnet.
 
@@ -626,19 +794,19 @@ layoutPathAt: index In: aForceSolver with: properties
 
 	"self buildLabelIn: aForceSolver attachedTo: midMagnet."
 
-	beta _ (offset = 0) ifTrue:[ -3 ] ifFalse: [(properties at:#transition_destination_separation_angle) * offset ].
+	beta := (offset = 0) ifTrue:[ -3 ] ifFalse: [(properties at:#transition_destination_separation_angle) * offset ].
 	
-	destinationMagnet _ Magnet 	charge:(properties at:#transition_destination_magnet_charge) position: destination position - ((direction * origin radius) rotatedBy: beta degreesToRadians). .
+	destinationMagnet := Magnet 	charge:charge position: destination position - ((direction * radius) rotatedBy: beta degreesToRadians). .
 
 	aForceSolver addObject: destinationMagnet.
 
 	aPath add: destinationMagnet.
 	
-	aForceSolver addConstraint: (Spring length: destination radius strength:(properties at:#transition_anchor_spring_strength) between:destinationMagnet and: destinationAnchor).
+	aForceSolver addConstraint: (Spring length: (1.0 * radius) strength: 10 * strength between:destinationMagnet and: destinationAnchor).
 
-	aForceSolver addConstraint: (Spring length: distance * (properties at:#transition_mid_spring_length_factor) strength: (properties at:#transition_mid_spring_strength) between: originMagnet and: midMagnet).
+	aForceSolver addConstraint: (Spring length: distance * (5/16) strength: strength between: originMagnet and: midMagnet).
 
-	aForceSolver addConstraint: (Spring length: distance * (properties at:#transition_mid_spring_length_factor) strength: (properties at:#transition_mid_spring_strength) between: midMagnet and: destinationMagnet).
+	aForceSolver addConstraint: (Spring length: distance * (5/16) strength: strength between: midMagnet and: destinationMagnet).
 ! !
 
 !DiagramTransition methodsFor: 'accessing' stamp: 'DF 12/3/2021 19:43:47'!
@@ -681,6 +849,29 @@ origin: aDiagramState
 paths
 	^paths! !
 
+!DiagramTransition methodsFor: 'shapes' stamp: 'DF 12/15/2023 21:32:44'!
+drawOn: aWhiteboard canvas: aCanvas
+
+	| font |
+	
+	font := FontFamily defaultFamilyPointSize: 9.
+	
+	1 to: paths size do:[:i | | p a b c n |
+	
+		p := paths at:i.
+		
+		a := p at:1 :: position . 	b := p at:2 :: position . c := p at:3 :: position.
+		
+		aWhiteboard drawOn: aCanvas quadraticBezierStart: a control: b end: c width: 1 color: Color black.
+	
+		aWhiteboard drawOn: aCanvas arrowHead: 8 at: c  direction: ( c - b ) normalized width: 1 color: Color black. 
+		n := (c - a) normal * 0.5.
+		
+		"aWhiteboard drawOn: aCanvas lineFrom: b to: b + (n * n theta cos abs ) width:1 color: Color red."
+		
+		aWhiteboard drawOn: aCanvas string: (labels at:i) at: b + (n * n theta cos abs) + (0.1 * (n theta sin)) font: font color: Color black.
+	]! !
+
 !StateDiagram methodsFor: 'initialization' stamp: 'DF 12/5/2021 16:48:21'!
 initialize
 
@@ -718,34 +909,50 @@ defaultDiagramName
 
 	^title ifNil:[properties at:#default_diagram_name] ! !
 
+!StateDiagram methodsFor: 'morphic' stamp: 'DF 12/15/2023 21:47:36'!
+drawOn: aWhiteboardMorph
+
+	aWhiteboardMorph removeAllShapes. 
+	
+	states do:[:each | aWhiteboardMorph addShape: each ].
+
+	transitions do:[:each | aWhiteboardMorph addShape: each ].
+! !
+
 !StateDiagram methodsFor: 'morphic' stamp: 'DF 11/30/2021 21:01:22'!
 editProperties
 
 	properties edit! !
 
-!StateDiagram methodsFor: 'morphic' stamp: 'DF 5/3/2022 09:22:25'!
+!StateDiagram methodsFor: 'morphic' stamp: 'DF 12/14/2023 19:43:38'!
 open
-	GaudiViewer open: self label: (title ifNil:['Kleene State Machine Diagram']).
+	KleeneViewer open: self label: (title ifNil:['Kleene State Machine Diagram']).
 ! !
 
-!StateDiagram methodsFor: 'morphic' stamp: 'DF 11/29/2023 19:37:31'!
-populate: aMorph
+!StateDiagram methodsFor: 'morphic' stamp: 'DF 12/15/2023 21:46:07'!
+populate: aWhiteboardMorph
 
-	| transform line rect p1 p2 p3 |
-	
+	self layoutDiagram.
+
+	self drawOn: aWhiteboardMorph 	
+"
+	| transform line rect p1 p2 p3 radius |
+
+	radius := properties at:#state_radius.
+		
 	self layoutDiagram.
 		
 	transform := AffineTransformation transformFrom: self window to: aMorph morphLocalBounds.
-	
-	transitions do:[:each | aMorph addAllMorphs: (each asMorph: transform with: properties) ].
-
-	selfTransitions do:[:each | aMorph addMorph: (each asMorph: transform with: properties) ].
 	 
 	states do:[:each | aMorph addMorph: (each asMorph: transform with: properties) ].
+	
+	transitions do:[:each | (each asMorph: transform with: properties) do:[:m | aMorph addMorph: m] ].
 
+	selfTransitions do:[:each | aMorph addMorph: (each asMorph: transform with: properties) ].
+"
 	"mark the initial state."
-
-	p3 := (transform transform: initialState position - (initialState radius@0)).
+"
+	p3 := (transform transform: initialState position - ( radius@0)).
 
 	p1 := p3 - (Point r:30 degrees: 30).
 	
@@ -763,7 +970,7 @@ populate: aMorph
 		
 	aMorph addMorph: line.
 
-	^aMorph ! !
+	^aMorph "! !
 
 !StateDiagram methodsFor: 'morphic' stamp: 'DF 11/30/2021 21:37:26'!
 solve: nIterations
@@ -861,12 +1068,12 @@ layoutStates
 	
 ! !
 
-!StateDiagram methodsFor: 'layout' stamp: 'DF 3/7/2023 23:01:23'!
+!StateDiagram methodsFor: 'layout' stamp: 'DF 12/15/2023 17:52:55'!
 layoutTransitions
 
 	| aSolver | 
 	
-	aSolver _ ForceDirectedSolver 	new.
+	aSolver := ForceDirectedSolver 	new.
 		
 	transitions do:[:each | each layoutIn: aSolver with: properties ].
 
@@ -923,20 +1130,76 @@ connect: originDiagramState to: destinationrDiagramState label: aString
 		
 		! !
 
-!StateDiagram methodsFor: 'accessing' stamp: 'DF 12/5/2021 16:48:21'!
+!StateDiagram methodsFor: 'accessing' stamp: 'DF 12/14/2023 20:34:25'!
+getProperty: aSymbol 
+	^properties at: aSymbol ! !
+
+!StateDiagram methodsFor: 'accessing' stamp: 'DF 12/14/2023 20:38:06'!
+getStateCharge
+
+	^self getProperty: #state_charge.! !
+
+!StateDiagram methodsFor: 'accessing' stamp: 'DF 12/14/2023 20:57:05'!
+getStateRadius
+
+	^self getProperty: #state_radius.! !
+
+!StateDiagram methodsFor: 'accessing' stamp: 'DF 12/14/2023 20:39:03'!
+getTransitionLength
+
+	^self getProperty: #state_layout_spring_length.! !
+
+!StateDiagram methodsFor: 'accessing' stamp: 'DF 12/14/2023 20:40:26'!
+getTransitionStrength
+
+	^self getProperty: #state_layout_spring_strength.! !
+
+!StateDiagram methodsFor: 'accessing' stamp: 'DF 12/15/2023 22:04:31'!
 setInitialState: aDiagramState
 
-	states add: aDiagramState. initialState _ aDiagramState.! !
+	states add: aDiagramState. 
+	
+	initialState := aDiagramState.
+	
+	aDiagramState initial: true.! !
 
 !StateDiagram methodsFor: 'accessing' stamp: 'DF 11/18/2021 10:48:24'!
 setProperty: aSymbol to: anObject
 	properties at: aSymbol put: anObject! !
 
+!StateDiagram methodsFor: 'accessing' stamp: 'DF 12/14/2023 20:36:58'!
+setStateCharge: aNumber
+
+	self setProperty: #state_charge to: aNumber.! !
+
+!StateDiagram methodsFor: 'accessing' stamp: 'DF 12/14/2023 20:57:17'!
+setStateRadius: aNumber
+
+	^self setProperty: #state_radius to: aNumber.! !
+
+!StateDiagram methodsFor: 'accessing' stamp: 'DF 12/14/2023 20:39:49'!
+setTransitionLength: aNumber
+
+	self setProperty: #state_layout_spring_length to: aNumber.! !
+
+!StateDiagram methodsFor: 'accessing' stamp: 'DF 12/14/2023 20:40:36'!
+setTransitionStrength: aNumber
+
+	self setProperty: #state_layout_spring_strength to: aNumber.! !
+
+!StateDiagram methodsFor: 'accessing' stamp: 'DF 12/15/2023 15:04:29'!
+states
+	^states! !
+
 !StateDiagram methodsFor: 'accessing' stamp: 'DF 5/3/2022 09:20:49'!
 title: aString
 	title _ aString! !
 
-!StateDiagram methodsFor: 'accessing' stamp: 'DF 11/30/2023 20:18:37'!
+!StateDiagram methodsFor: 'accessing' stamp: 'DF 12/15/2023 15:08:35'!
+transitions
+	^transitions! !
+
+!StateDiagram methodsFor: 'accessing' stamp: 'DF 12/14/2023 21:06:20'!
 window
 
 	"answers the smallest rectangle that holds all the states and transitions in the system"
@@ -950,7 +1213,7 @@ window
 	
 	window := Rectangle encompassing: positions.
 	
-	radius := (states collect:[:each | each radius]) max.
+	radius := properties at:#state_radius.
 	
 	window := window expandBy: (radius @ radius) * 3.
 	
@@ -997,20 +1260,26 @@ isConnected
 	
 	! !
 
-!StateDiagram class methodsFor: 'examples' stamp: 'DF 3/6/2023 22:05:19'!
+!StateDiagram class methodsFor: 'examples' stamp: 'DF 12/15/2023 16:55:02'!
 example
 
 	"self example"
 	
-	| a b c aStateDiagram |
-	
-	a _ DiagramState new radius:1 ; label:'a'; yourself.
-	
-	b _ DiagramState new radius:1 ; label:'b' ; yourself.
-	
-	c _ DiagramState new radius:1 ; label:'c';  accepting: true; yourself.
+	| r a b c aStateDiagram |
 
-	aStateDiagram _ self new.
+	aStateDiagram := self new.
+	
+	r := 0.5.
+	
+	aStateDiagram setProperty: #state_radius to:r.
+
+	aStateDiagram setProperty: #state_layout_spring_length to: 6.
+
+	a := DiagramState new radius:r ; label:'a'; yourself.
+	
+	b := DiagramState new radius:r ; label:'b' ; yourself.
+	
+	c := DiagramState new radius:r ; label:'c';  accepting: true; yourself.
 		
 	aStateDiagram addState: a; addState:b ; addState:c.
 
@@ -1023,47 +1292,53 @@ example
 	aStateDiagram connect: b to: c 	label: 'close'.
 	aStateDiagram connect: a to: c 	label: 'insert'.
 	
-	aStateDiagram setProperty: #transition_layout_solver_iterations to:10.
-
-	aStateDiagram setProperty: #state_charge to:15.
-
-	aStateDiagram setProperty: #state_layout_spring_strength to: 5.
+"
 	
-	aStateDiagram setProperty: #state_layout_spring_length to: 10.
+	aStateDiagram setProperty: #transition_layout_solver_iterations to:30.
+
+	aStateDiagram setProperty: #state_charge to:1.5.
+
+	aStateDiagram setProperty: #state_layout_spring_strength to: 0.75.
+	
+	aStateDiagram setProperty: #state_layout_spring_length to: 3.
 	
 	aStateDiagram setProperty: #transition_label_relative_position to: 0.3.
 	
 	aStateDiagram setProperty: #debug_labels to:true.
-	
+"	
 	aStateDiagram open.
 ! !
 
-!StateDiagram class methodsFor: 'examples' stamp: 'DF 3/7/2023 22:27:37'!
+!StateDiagram class methodsFor: 'examples' stamp: 'DF 12/15/2023 22:18:40'!
 example2
  
 	"self example2" 
 	
-	| abc ab bc ac a b c empty aStateDiagram |
-	
-	a _ DiagramState new radius:1 ; label:'{a}'; yourself.
-	
-	b _ DiagramState new radius:1; label:'{b}' ; yourself.
-	
-	c _ DiagramState new radius:1 ; label:'{c}';  yourself.
+	| r abc ab bc ac a b c empty aStateDiagram |
+		
+	aStateDiagram := self new.
 
-	ab _ DiagramState new radius:1 ; label:'{a,b}'; yourself.
-	
-	bc _ DiagramState new radius:1 ; label:'{b,c}' ; yourself.
-	
-	ac _ DiagramState new radius:1 ; label:'{a,c}';  yourself.
+	r := 0.5.
 
-	abc _ DiagramState new radius:1 ; label:'{a,b,c}';  yourself.
+	aStateDiagram setProperty: #state_radius to: r.
 	
-	empty _ DiagramState new radius:1; label:'{}'; yourself.
+	a := DiagramState new radius:r ; label:'{a}'; yourself.
+	
+	b := DiagramState new radius:r ; label:'{b}' ; yourself.
+	
+	c := DiagramState new radius:r ; label:'{c}';  yourself.
 
-	aStateDiagram _ self new.
+	ab := DiagramState new radius:r ; label:'{a,b}'; yourself.
+	
+	bc := DiagramState new radius:r ; label:'{b,c}' ; yourself.
+	
+	ac := DiagramState new radius:r ; label:'{a,c}';  yourself.
 
-	aStateDiagram setProperty: #transition_layout_solver_iterations to:10.
+	abc := DiagramState new radius:r ; label:'{a,b,c}';  yourself.
+	
+	empty := DiagramState new radius:r ; label:'{}'; yourself.
+
+	aStateDiagram setProperty: #transition_layout_solver_iterations to:30.
 
 	aStateDiagram setProperty: #state_charge to:15.
 
@@ -1075,7 +1350,7 @@ example2
 	
 	aStateDiagram addState:empty; addState: a; addState:b ; addState:c; addState: ab; addState: bc; addState:ac; addState:abc.
 	
-	aStateDiagram setInitialState: a.
+	aStateDiagram setInitialState: empty.
 	
 	aStateDiagram connect: empty to: a 	label: 'a'.
 	aStateDiagram connect: empty to: b 	label: 'b'.
@@ -1108,22 +1383,26 @@ example2
 	
 ! !
 
-!StateDiagram class methodsFor: 'examples' stamp: 'DF 3/6/2023 20:16:12'!
+!StateDiagram class methodsFor: 'examples' stamp: 'DF 12/15/2023 18:32:53'!
 example3
 
 	"self example3"
 	
-	| a b c d aStateDiagram |
-	
-	a _ DiagramState new radius:1 ; label:'a'; yourself.
-	
-	b _ DiagramState new radius:1 ; label:'b' ; yourself.
-	
-	c _ DiagramState new radius:1 ; label:'c';  yourself.
+	| r a b c d aStateDiagram |
+		
+	aStateDiagram := self new.
 
-	d _ DiagramState new radius:1 ; label:'d';  yourself.
+	r := 0.5.
 
-	aStateDiagram _ self new.
+	aStateDiagram setProperty: #state_radius to: r.
+	
+	a := DiagramState new radius:r ; label:'a'; yourself.
+	
+	b := DiagramState new radius:r ; label:'b' ; yourself.
+	
+	c := DiagramState new radius:r ;label:'c';  yourself.
+
+	d := DiagramState new radius:r ;label:'d';  yourself.
 
 	aStateDiagram setProperty: #state_charge to:15.
 
@@ -1148,14 +1427,18 @@ example3
 	
 ! !
 
-!StateDiagram class methodsFor: 'examples' stamp: 'DF 3/6/2023 20:16:17'!
+!StateDiagram class methodsFor: 'examples' stamp: 'DF 12/15/2023 18:33:50'!
 example4
 
 	"self example4"
 	
-	| states aStateDiagram |
+	| r states aStateDiagram |
 	
-	aStateDiagram _ self new.
+	aStateDiagram := self new.
+
+	r := 0.5.
+
+	aStateDiagram setProperty: #state_radius to: r.
 
 	aStateDiagram setProperty: #transition_layout_solver_iterations to:10.
 
@@ -1165,7 +1448,7 @@ example4
 	
 	aStateDiagram setProperty: #state_layout_spring_length to: 10.
 		
-	states _ (1 to: 11) collect:[ :each | DiagramState new radius:1 ; label: each asString; yourself].
+	states := (1 to: 11) collect:[ :each | DiagramState new radius:r ; label: each asString; yourself].
 
 	aStateDiagram setInitialState: (states at:1).
 	(states at:3) accepting: true.
@@ -1203,15 +1486,19 @@ example4
 	aStateDiagram open.
 ! !
 
-!StateDiagram class methodsFor: 'examples' stamp: 'DF 3/6/2023 20:16:23'!
+!StateDiagram class methodsFor: 'examples' stamp: 'DF 12/15/2023 20:44:46'!
 example5
 
 	"self example5"
 	
-	| states aStateDiagram |
+	| r states aStateDiagram |
 	
-	aStateDiagram _ self new.
+	aStateDiagram := self new.
 
+	r := 0.5.
+
+	aStateDiagram setProperty: #state_radius to: r.
+	
 	aStateDiagram setProperty: #transition_layout_solver_iterations to:10.
 
 	aStateDiagram setProperty: #state_charge to:15.
@@ -1224,7 +1511,7 @@ example5
 	aStateDiagram setProperty: #transition_label_font to: (FontFamily defaultFamilyPointSize:9).
 
 		
-	states _ (1 to: 11) collect:[ :each | DiagramState new radius:0.75 ; label: each asString; yourself].
+	states := (1 to: 11) collect:[ :each | DiagramState new label: each asString; radius:r; yourself].
 
 	(states at:3) accepting: true.
 	
@@ -1264,16 +1551,20 @@ example5
 	aStateDiagram open.
 ! !
 
-!StateDiagram class methodsFor: 'examples' stamp: 'DF 3/6/2023 20:16:27'!
+!StateDiagram class methodsFor: 'examples' stamp: 'DF 12/15/2023 22:21:22'!
 example6
 
 	"self example6"
 	
-	| states aStateDiagram |
+	| r states aStateDiagram |
 	
-	aStateDiagram _ self new.
+	aStateDiagram := self new.
 
-	states _ (1 to: 2) collect:[ :each | DiagramState new radius:1 ; label: each asString; yourself].
+	r := 0.5.
+
+	aStateDiagram setProperty: #state_radius to: r.
+
+	states := (1 to: 2) collect:[ :each | DiagramState new label: each asString; radius:r ; yourself].
 
 	states do:[:each | aStateDiagram addState: each ].
 
@@ -1294,21 +1585,25 @@ example6
 	aStateDiagram open.
 ! !
 
-!StateDiagram class methodsFor: 'examples' stamp: 'DF 3/6/2023 20:16:32'!
+!StateDiagram class methodsFor: 'examples' stamp: 'DF 12/15/2023 22:22:42'!
 example7
 
 	"self example7"
 	
-	| a b c aStateDiagram |
-	
-	a _ DiagramState new radius:1 ; label:'a'; yourself.
-	
-	b _ DiagramState new radius:1 ; label:'b' ; yourself.
-	
-	c _ DiagramState new radius:1 ; label:'c';  accepting: true; yourself.
+	| r a b c aStateDiagram |
 
-	aStateDiagram _ self new.
-		
+	aStateDiagram := self new.
+
+	r := 0.5.
+
+	aStateDiagram setProperty: #state_radius to: r.
+	
+	a := DiagramState new label:'a'; radius: r; yourself.
+	
+	b := DiagramState new label:'b' ; radius: r; yourself.
+	
+	c := DiagramState new label:'c';  radius: r; accepting: true; yourself.
+
 	aStateDiagram addState: a; addState:b ; addState:c.
 
 	aStateDiagram setInitialState: a.
@@ -1331,14 +1626,14 @@ example7
 	aStateDiagram open.
 ! !
 
-!StateDiagram class methodsFor: 'examples' stamp: 'DF 3/7/2023 22:15:28'!
+!StateDiagram class methodsFor: 'examples' stamp: 'DF 12/15/2023 22:26:12'!
 example8
 
 	"self example8"
 	
 	| aStateDiagram |
 	
-	aStateDiagram _ self radius: 0.5 initial: 1 states: { 1 . 2 . 3 . 4 } transitions: { { 1 . 'b' . 1 } . { 1 . 'a' . 2 } . { 2 . 'b' . 2 } . { 2 . 'a' . 3 } . { 3 . 'a' . 3 } . { 3 . 'b' . 4 } . { 4 . 'a' . 1 } . { 4 . 'b' . 4 } } accepting: { 3 . 4 }.
+	aStateDiagram := self radius: 0.5 initial: 1 states: { 1 . 2 . 3 . 4 } transitions: { { 1 . 'b' . 1 } . { 1 . 'a' . 2 } . { 2 . 'b' . 2 } . { 2 . 'a' . 3 } . { 3 . 'a' . 3 } . { 3 . 'b' . 4 } . { 4 . 'a' . 1 } . { 4 . 'b' . 4 } } accepting: { 3 . 4 }.
 	
 	aStateDiagram setProperty: #transition_layout_solver_iterations to:10.
 
@@ -1346,19 +1641,19 @@ example8
 
 	aStateDiagram setProperty: #state_layout_spring_strength to: 5.
 	
-	aStateDiagram setProperty: #state_layout_spring_length to:10.
+	aStateDiagram setProperty: #state_layout_spring_length to:5.
 	
 	aStateDiagram title: 'sm1' ; open.
 ! !
 
-!StateDiagram class methodsFor: 'examples' stamp: 'DF 3/7/2023 22:52:27'!
+!StateDiagram class methodsFor: 'examples' stamp: 'DF 12/15/2023 22:27:42'!
 example9
 
 	"self example9"
 	
 	| aStateDiagram |
 	
-	aStateDiagram _ self radius: 0.5 initial: 1 states: { 1 . 2 . 3 . 4 } transitions: { { 1 . 'b' . 1 } . { 1 . 'a' . 2 } . {1 . 'c' .  3} . { 2 . 'a' . 3 }  . { 3 . 'b' . 4 } . { 4 . 'a' . 1 } } accepting: { 3 . 4 }.
+	aStateDiagram := self radius: 0.5 initial: 1 states: { 1 . 2 . 3 . 4 } transitions: { { 1 . 'b' . 1 } . { 1 . 'a' . 2 } . {1 . 'c' .  3} . { 2 . 'a' . 3 }  . { 3 . 'b' . 4 } . { 4 . 'a' . 1 } } accepting: { 3 . 4 }.
 	
 	aStateDiagram setProperty: #transition_layout_solver_iterations to:10.
 
@@ -1370,17 +1665,18 @@ example9
 	
 	aStateDiagram title: 'sm1' ; open.
 
-	aStateDiagram explore.! !
+! !
 
-!StateDiagram class methodsFor: 'class initialization' stamp: 'DF 3/6/2023 22:05:58'!
+!StateDiagram class methodsFor: 'class initialization' stamp: 'DF 12/14/2023 20:54:05'!
 initialize
 
 	"self initialize"
 	
-	Defaults _ CascadingProperties new
+	Defaults := CascadingProperties new
 		  at: #state_diagram_inset put: 64
 		; at: #transition_line_width put:			1
 		; at: #state_position_range put: 800
+		; at: #state_radius put: 1
 		; at: #state_charge put: 1
 		; at: #state_layout_spring_length put: 10
 		; at: #state_layout_spring_strength put:0.75
@@ -1419,14 +1715,16 @@ initialize
 		
 		! !
 
-!StateDiagram class methodsFor: 'instance creation' stamp: 'DF 3/6/2023 20:16:36'!
+!StateDiagram class methodsFor: 'instance creation' stamp: 'DF 12/15/2023 22:24:18'!
 radius: aNumber initial: anObject states: aSet transitions: aRelation
 
 	| aStateDiagram map |
 		
-	aStateDiagram _ self new.
+	aStateDiagram := self new.
 	
-	map _ Dictionary new.
+	aStateDiagram setProperty:#state_radius to: aNumber.
+	
+	map := Dictionary new.
 			
 	aSet do:[:each | map at: each put: (DiagramState new label: each asString; radius: aNumber; yourself) ].	
 
@@ -1438,14 +1736,16 @@ radius: aNumber initial: anObject states: aSet transitions: aRelation
 	
 	^aStateDiagram! !
 
-!StateDiagram class methodsFor: 'instance creation' stamp: 'DF 3/6/2023 20:16:40'!
+!StateDiagram class methodsFor: 'instance creation' stamp: 'DF 12/15/2023 22:24:26'!
 radius: aNumber initial: anObject states: states transitions: tuples accepting: acceptingStates
 
 	| aStateDiagram map |
 		
-	aStateDiagram _ self new.
+	aStateDiagram := self new.
+
+	aStateDiagram setProperty:#state_radius to: aNumber.
 	
-	map _ Dictionary new.
+	map := Dictionary new.
 			
 	states do:[:each | map at: each put: (DiagramState new label: each asString; radius: aNumber; yourself) ].	
 
@@ -1506,6 +1806,104 @@ enumerate: anInteger
 
 	
 	! !
+
+!Whiteboard methodsFor: 'drawing' stamp: 'DF 12/15/2023 16:17:47'!
+drawOn: aCanvas arrowHead: length at: aPoint direction: aDirection width: aNumber color: aColor
+
+	| p q |
+
+	p := ​ transform transform: aPoint.
+	q := ​ p - (Point r: length degrees: (aDirection degrees - 30)).
+	
+	aCanvas
+		line: p
+		to: q
+		width: aNumber
+		color: aColor.
+
+	q := p - (Point r: length degrees: (aDirection degrees + 30)).
+				
+	aCanvas
+		line: p
+		to: q
+		width: aNumber
+		color: aColor.
+	! !
+
+!Whiteboard methodsFor: 'drawing' stamp: 'DF 12/15/2023 14:08:27'!
+drawOn: aCanvas circleCenter: aPoint radius: aNumber borderWidth: bwidth borderColor: bcolor fillColor: fcolor
+
+	| p r |
+	
+	r := aNumber * (transform a11 @ transform a22).
+	
+	p := transform transform: aPoint.
+		
+	aCanvas ellipseCenter: p radius: r borderWidth: bwidth borderColor: bcolor fillColor: fcolor.! !
+
+!Whiteboard methodsFor: 'drawing' stamp: 'DF 12/15/2023 21:13:53'!
+drawOn: aCanvas lineFrom: startPoint to: endPoint width: aNumber color: aColor
+
+	| s e |
+	
+	s := transform transform: startPoint.
+	e := transform transform: endPoint.
+	
+	aCanvas strokeWidth: aNumber color: aColor do: [
+		aCanvas 
+			moveTo: s;
+			lineTo: e
+	]! !
+
+!Whiteboard methodsFor: 'drawing' stamp: 'DF 12/15/2023 14:56:04'!
+drawOn: aCanvas quadraticBezierStart: startPoint control: controlPoint end: endPoint width: aNumber color: aColor
+	
+	| s c e |
+	
+	s := transform transform: startPoint.
+	c := transform transform: controlPoint.
+	e := transform transform: endPoint.
+	
+	aCanvas strokeWidth: aNumber color: aColor do: [
+		aCanvas 
+			moveTo: s;
+			quadraticBezierTo: e control: c 
+	]! !
+
+!Whiteboard methodsFor: 'drawing' stamp: 'DF 12/15/2023 20:55:28'!
+drawOn: aCanvas string: aString at: aPoint font: aFont color: aColor 	
+
+	| p e b f |
+	
+	p := transform transform: aPoint.
+
+	e := ((aFont widthOfString: aString) max: 3)  @ aFont lineSpacing.
+	
+	b := p extent: e. 
+	
+	f := b aligned: b center with: p.
+	
+	"aCanvas frameRectangle: (f) borderWidth: 1 color: Color red."
+	
+	aCanvas drawString: aString at: f origin font: aFont color: aColor.! !
+
+!Whiteboard methodsFor: 'as yet unclassified' stamp: 'DF 12/15/2023 13:47:04'!
+window: aRectangle viewport: anotherRectangle
+	
+	window := aRectangle.
+	viewport := anotherRectangle.
+	
+	transform := AffineTransformation transformFrom: window to: viewport ! !
+
+!Whiteboard methodsFor: 'as yet unclassified' stamp: 'DF 12/15/2023 17:15:41'!
+zoomIn
+
+	self window: (window expandBy: (-0.1 * window extent)) viewport: viewport.! !
+
+!Whiteboard methodsFor: 'as yet unclassified' stamp: 'DF 12/15/2023 17:15:32'!
+zoomOut
+
+	self window: (window expandBy: (0.1 * window extent)) viewport: viewport.! !
 
 !Set methodsFor: '*Kleene' stamp: 'DF 12/4/2021 21:50:52'!
 subsets
