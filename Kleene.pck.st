@@ -1,19 +1,9 @@
-'From Cuis 6.0 [latest update: #6053] on 15 December 2023 at 10:28:06 pm'!
+'From Cuis 6.0 [latest update: #6053] on 18 December 2023 at 10:58:48 pm'!
 'Description '!
-!provides: 'Kleene' 1 9!
+!provides: 'Kleene' 1 14!
 !requires: 'Gaudi' 1 0 nil!
 SystemOrganization addCategory: #Kleene!
 
-
-!classDefinition: #KleeneViewerMorph category: #Kleene!
-GaudiViewerMorph subclass: #KleeneViewerMorph
-	instanceVariableNames: ''
-	classVariableNames: ''
-	poolDictionaries: ''
-	category: 'Kleene'!
-!classDefinition: 'KleeneViewerMorph class' category: #Kleene!
-KleeneViewerMorph class
-	instanceVariableNames: ''!
 
 !classDefinition: #ArcMorph category: #Kleene!
 BoxedMorph subclass: #ArcMorph
@@ -65,6 +55,16 @@ TestCase subclass: #StateDiagramTest
 StateDiagramTest class
 	instanceVariableNames: ''!
 
+!classDefinition: #TestCircle category: #Kleene!
+TestCase subclass: #TestCircle
+	instanceVariableNames: ''
+	classVariableNames: ''
+	poolDictionaries: ''
+	category: 'Kleene'!
+!classDefinition: 'TestCircle class' category: #Kleene!
+TestCircle class
+	instanceVariableNames: ''!
+
 !classDefinition: #KleeneViewer category: #Kleene!
 GaudiViewer subclass: #KleeneViewer
 	instanceVariableNames: ''
@@ -73,6 +73,16 @@ GaudiViewer subclass: #KleeneViewer
 	category: 'Kleene'!
 !classDefinition: 'KleeneViewer class' category: #Kleene!
 KleeneViewer class
+	instanceVariableNames: ''!
+
+!classDefinition: #Circle category: #Kleene!
+Object subclass: #Circle
+	instanceVariableNames: 'center radius'
+	classVariableNames: ''
+	poolDictionaries: ''
+	category: 'Kleene'!
+!classDefinition: 'Circle class' category: #Kleene!
+Circle class
 	instanceVariableNames: ''!
 
 !classDefinition: #DiagramSelfTransition category: #Kleene!
@@ -364,6 +374,10 @@ removeAllShapes
 requiresVectorCanvas
 	^true! !
 
+!WhiteboardMorph methodsFor: 'as yet unclassified' stamp: 'DF 12/16/2023 20:44:03'!
+whiteboard
+	^whiteboard! !
+
 !WhiteboardMorph methodsFor: 'as yet unclassified' stamp: 'DF 12/15/2023 13:36:09'!
 whiteboard: aWhiteboard
 	whiteboard := aWhiteboard! !
@@ -381,6 +395,21 @@ zoomOut
 	whiteboard zoomOut.
 	
 	self redrawNeeded.! !
+
+!WhiteboardMorph methodsFor: 'as yet unclassified' stamp: 'DF 12/18/2023 19:58:06'!
+zoomToFitAll
+	
+	| a origin c |
+	
+	a := self owner viewableArea.
+	
+	origin := self internalize: a origin.
+	c := self internalize: a corner.
+	
+	whiteboard viewport: (origin corner:c).​ 
+	
+	self redrawNeeded.
+! !
 
 !StateDiagramTest methodsFor: 'as yet unclassified' stamp: 'DF 12/14/2023 21:07:00'!
 testIsConnected
@@ -434,15 +463,36 @@ testNotConnected
 	self assert: aStateDiagram isConnected equals: false
 	! !
 
-!KleeneViewer class methodsFor: 'as yet unclassified' stamp: 'DF 12/15/2023 21:45:24'!
+!TestCircle methodsFor: 'as yet unclassified' stamp: 'DF 12/18/2023 21:55:59'!
+testIntersection
+
+	| c1 c2 c3 c4 |
+	
+	c1 := Circle new center: 0@0 ; radius: 1.0 ; yourself.
+	
+	c2 := Circle new center: 1.5@0 ; radius: 0.5; yourself.
+	
+	self assert: (c1 intersection: c2) equals: { 1.0 @ 0.0 } asOrderedCollection.
+	
+	c3 := Circle new center: 0@1.5 ; radius: 0.5; yourself.
+
+	self assert: ((c1 intersection: c3) at:1) x abs < 1e-9.
+	
+	self assert: ((c1 intersection: c3) at:1) y isCloseTo: 1.0.
+	
+	c4 := Circle new center: 1.5@0 ; radius: 1.0; yourself.
+
+	self assert: (c1 intersection: c4) equals: { 0.75 @ (1 - 0.75 squared) sqrt . 0.75 @ (0 - (1 - 0.75 squared) sqrt) } asOrderedCollection.
+! !
+
+!KleeneViewer class methodsFor: 'as yet unclassified' stamp: 'DF 12/18/2023 22:03:51'!
 open: model label: aString
 
-	| vport aWhiteboard aWhiteboardMorph aScrollPane aColumnMorph aRowMorph  aWindow |
+	| viewport a aWhiteboard aWhiteboardMorph aScrollPane aColumnMorph aRowMorph  aWindow |
 
 	model layoutDiagram.
 
-	vport := 	0@0 extent: 1024 @ 1024.
-	aWhiteboard := Whiteboard new window: model window viewport: (vport aligned: vport center with: 1500@1500) ; yourself.
+	aWhiteboard := Whiteboard new.
 	
 	aWhiteboardMorph := WhiteboardMorph new.
 	
@@ -476,9 +526,64 @@ open: model label: aString
 
 	aWindow openInWorld.
 	
+	a := aScrollPane viewableArea.
+	
+	viewport := a aligned: a center with: aWhiteboardMorph morphExtent / 2.
+	
+	aWhiteboard window: model window viewport: viewport.
+	
+	aScrollPane scrollToShow: viewport.
+	
 	model drawOn: aWhiteboardMorph.
 
 ! !
+
+!Circle methodsFor: 'as yet unclassified' stamp: 'DF 12/18/2023 21:42:14'!
+center
+	^center! !
+
+!Circle methodsFor: 'as yet unclassified' stamp: 'DF 12/18/2023 21:42:11'!
+center: aPoint
+	center := aPoint! !
+
+!Circle methodsFor: 'as yet unclassified' stamp: 'DF 12/18/2023 21:46:11'!
+intersection: aCircle
+
+	| d pts x delta h | 
+	
+	pts := OrderedCollection new.
+	
+	" first calculate the intersection points assuming self is centered at 0,0 and aCircle lies on the x axis"
+	
+	d := center dist: aCircle center.
+	
+	self assert: d abs > (1e-6 * radius). "they must not be too close to each other".
+	
+	x := (d squared + radius squared - aCircle radius squared) / (2 * d ).
+	
+	delta := radius squared - x squared.
+	
+	delta < 0 ifTrue:[^pts]. "no intersection"
+	
+	h := (radius squared - x squared) sqrt.
+	
+	pts add: x @ h.
+	
+	delta > (1e-6 * radius)
+		ifTrue:[ pts add: x @(0 - h)  ].
+
+	"now rotate and translate the two points back to the actual position of the circles "
+	
+	^pts collect:[:each | each rotatedBy: (aCircle center - center) theta :: translatedBy: center ]
+	! !
+
+!Circle methodsFor: 'as yet unclassified' stamp: 'DF 12/18/2023 21:42:24'!
+radius
+	^radius! !
+
+!Circle methodsFor: 'as yet unclassified' stamp: 'DF 12/18/2023 21:42:21'!
+radius: aNumber
+	radius := aNumber! !
 
 !DiagramSelfTransition methodsFor: 'accessing' stamp: 'DF 12/15/2020 18:49:08'!
 label: aString
@@ -526,7 +631,7 @@ asMorph: aTransform with: properties
 	
 	^anArcMorph ! !
 
-!DiagramSelfTransition methodsFor: 'morphic' stamp: 'DF 12/14/2023 21:01:50'!
+!DiagramSelfTransition methodsFor: 'morphic' stamp: 'DF 12/18/2023 22:48:06'!
 layoutIn: aForceSolver around: magnets with: properties 
 
 	| radius anchor spring index maxa maxi a p |
@@ -555,7 +660,7 @@ layoutIn: aForceSolver around: magnets with: properties
 	
 	magnet := Magnet new charge: (properties at:#self_transition_magnet_charge); position: state position + (p) ; yourself.
 
-	spring := Spring length: (properties at:#self_transition_spring_length_factor) * radius strength: (properties at:#self_transition_spring_strength) between: anchor and: magnet.
+	spring := Spring length: radius * 1.5 strength: (properties at:#self_transition_spring_strength) between: anchor and: magnet.
 	
 	aForceSolver addObject: anchor; addObject: magnet; addConstraint: spring.
 ! !
@@ -575,6 +680,29 @@ layoutIn: aForceSolver with: properties
 	
 	aForceSolver addObject: anchor; addObject: magnet; addConstraint: spring.
 ! !
+
+!DiagramSelfTransition methodsFor: 'shapes' stamp: 'DF 12/18/2023 22:51:22'!
+drawOn: aWhiteboard canvas: aCanvas
+
+	| p pts c1 c2 r |
+	
+	p := state position + ((magnet position - state position) * 1.3).
+	r := state radius * 1.
+	
+	aWhiteboard drawOn: aCanvas circleCenter: p radius: r borderWidth: 1 borderColor: Color black fillColor: Color transparent.
+	
+	c1 := Circle new center: state position ; radius: state radius ; yourself.
+	c2 := Circle new center: p; radius: r ; yourself.
+	
+	pts := c1 intersection: c2.
+	
+	"pts do:[:each | aWhiteboard drawOn: aCanvas circleCenter: each radius: 0.1* state radius borderWidth:1 borderColor: Color blue fillColor: Color blue]."
+	
+	pts ifEmpty:[^self].
+
+	aWhiteboard drawOn: aCanvas arrowHead: 8 at: pts first direction: (pts first - p) normal width:1 color: Color black.
+	
+	"aWhiteboard drawOn: aCanvas circleCenter: magnet position radius: 0.2* state radius borderWidth:1 borderColor: Color blue fillColor: Color red "! !
 
 !DiagramState methodsFor: 'accessing' stamp: 'DF 12/13/2020 15:17:24'!
 accepting: aBoolean
@@ -603,6 +731,10 @@ position
 !DiagramState methodsFor: 'accessing' stamp: 'DF 12/13/2020 14:52:20'!
 position: aPoint
 	position _ aPoint! !
+
+!DiagramState methodsFor: 'accessing' stamp: 'DF 12/18/2023 22:05:10'!
+radius
+	^radius! !
 
 !DiagramState methodsFor: 'accessing' stamp: 'DF 12/15/2023 14:44:46'!
 radius: aNumber
@@ -909,14 +1041,18 @@ defaultDiagramName
 
 	^title ifNil:[properties at:#default_diagram_name] ! !
 
-!StateDiagram methodsFor: 'morphic' stamp: 'DF 12/15/2023 21:47:36'!
+!StateDiagram methodsFor: 'morphic' stamp: 'DF 12/18/2023 22:50:44'!
 drawOn: aWhiteboardMorph
 
 	aWhiteboardMorph removeAllShapes. 
-	
+		
+	selfTransitions do:[:each | aWhiteboardMorph addShape: each ].
+
 	states do:[:each | aWhiteboardMorph addShape: each ].
 
 	transitions do:[:each | aWhiteboardMorph addShape: each ].
+	
+
 ! !
 
 !StateDiagram methodsFor: 'morphic' stamp: 'DF 11/30/2021 21:01:22'!
@@ -929,48 +1065,17 @@ open
 	KleeneViewer open: self label: (title ifNil:['Kleene State Machine Diagram']).
 ! !
 
-!StateDiagram methodsFor: 'morphic' stamp: 'DF 12/15/2023 21:46:07'!
+!StateDiagram methodsFor: 'morphic' stamp: 'DF 12/18/2023 19:29:08'!
 populate: aWhiteboardMorph
 
 	self layoutDiagram.
 
-	self drawOn: aWhiteboardMorph 	
-"
-	| transform line rect p1 p2 p3 radius |
-
-	radius := properties at:#state_radius.
-		
-	self layoutDiagram.
-		
-	transform := AffineTransformation transformFrom: self window to: aMorph morphLocalBounds.
-	 
-	states do:[:each | aMorph addMorph: (each asMorph: transform with: properties) ].
+	aWhiteboardMorph whiteboard window: self window viewport: ((0@0 extent: aWhiteboardMorph morphExtent) insetBy: 30).
 	
-	transitions do:[:each | (each asMorph: transform with: properties) do:[:m | aMorph addMorph: m] ].
-
-	selfTransitions do:[:each | aMorph addMorph: (each asMorph: transform with: properties) ].
-"
-	"mark the initial state."
-"
-	p3 := (transform transform: initialState position - ( radius@0)).
-
-	p1 := p3 - (Point r:30 degrees: 30).
+	self drawOn: aWhiteboardMorph.
 	
-	p2 :=  (p1 + p3) / 2.0.
-	
-	rect := Rectangle encompassing: {p1 . p2 . p3 }.
-	
-	line := QuadraticBezier new. 
-
-	line morphPosition: rect origin ; morphExtent: rect extent.
-		
-	line color: (properties at: #transition_morph_color); curveWidth: (properties at: #transition_morph_width); arrow:  true.
-	
-	line start: 0@0 ; control: p2 - p1; end: p3 - p1.
-		
-	aMorph addMorph: line.
-
-	^aMorph "! !
+	aWhiteboardMorph redrawNeeded.
+! !
 
 !StateDiagram methodsFor: 'morphic' stamp: 'DF 11/30/2021 21:37:26'!
 solve: nIterations
@@ -1172,9 +1277,11 @@ setStateCharge: aNumber
 
 	self setProperty: #state_charge to: aNumber.! !
 
-!StateDiagram methodsFor: 'accessing' stamp: 'DF 12/14/2023 20:57:17'!
+!StateDiagram methodsFor: 'accessing' stamp: 'DF 12/18/2023 19:30:07'!
 setStateRadius: aNumber
 
+	states do:[:each | each radius: aNumber].
+	
 	^self setProperty: #state_radius to: aNumber.! !
 
 !StateDiagram methodsFor: 'accessing' stamp: 'DF 12/14/2023 20:39:49'!
@@ -1886,6 +1993,13 @@ drawOn: aCanvas string: aString at: aPoint font: aFont color: aColor
 	"aCanvas frameRectangle: (f) borderWidth: 1 color: Color red."
 	
 	aCanvas drawString: aString at: f origin font: aFont color: aColor.! !
+
+!Whiteboard methodsFor: 'as yet unclassified' stamp: 'DF 12/18/2023 19:45:49'!
+viewport: anotherRectangle
+	
+	viewport := anotherRectangle.
+	
+	transform := AffineTransformation transformFrom: window to: viewport ! !
 
 !Whiteboard methodsFor: 'as yet unclassified' stamp: 'DF 12/15/2023 13:47:04'!
 window: aRectangle viewport: anotherRectangle
