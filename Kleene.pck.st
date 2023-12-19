@@ -1,39 +1,9 @@
-'From Cuis 6.0 [latest update: #6053] on 18 December 2023 at 10:58:48 pm'!
+'From Cuis 6.0 [latest update: #6053] on 19 December 2023 at 10:01:54 pm'!
 'Description '!
-!provides: 'Kleene' 1 14!
+!provides: 'Kleene' 1 17!
 !requires: 'Gaudi' 1 0 nil!
 SystemOrganization addCategory: #Kleene!
 
-
-!classDefinition: #ArcMorph category: #Kleene!
-BoxedMorph subclass: #ArcMorph
-	instanceVariableNames: 'angle direction lineWidth arrow arrowHeadLength'
-	classVariableNames: ''
-	poolDictionaries: ''
-	category: 'Kleene'!
-!classDefinition: 'ArcMorph class' category: #Kleene!
-ArcMorph class
-	instanceVariableNames: ''!
-
-!classDefinition: #QuadraticBezier category: #Kleene!
-BoxedMorph subclass: #QuadraticBezier
-	instanceVariableNames: 'start end control curveWidth arrow arrowHeadLength'
-	classVariableNames: ''
-	poolDictionaries: ''
-	category: 'Kleene'!
-!classDefinition: 'QuadraticBezier class' category: #Kleene!
-QuadraticBezier class
-	instanceVariableNames: ''!
-
-!classDefinition: #StateMorph category: #Kleene!
-BoxedMorph subclass: #StateMorph
-	instanceVariableNames: 'label accepting font textColor'
-	classVariableNames: ''
-	poolDictionaries: ''
-	category: 'Kleene'!
-!classDefinition: 'StateMorph class' category: #Kleene!
-StateMorph class
-	instanceVariableNames: ''!
 
 !classDefinition: #WhiteboardMorph category: #Kleene!
 BoxedMorph subclass: #WhiteboardMorph
@@ -135,218 +105,6 @@ Object subclass: #Whiteboard
 Whiteboard class
 	instanceVariableNames: ''!
 
-
-!ArcMorph methodsFor: 'accessing' stamp: 'DF 12/8/2020 19:23:43'!
-angle: anAngle
-	angle _ anAngle! !
-
-!ArcMorph methodsFor: 'accessing' stamp: 'DF 12/8/2020 20:12:48'!
-direction: anAngle
-
-	direction _ anAngle! !
-
-!ArcMorph methodsFor: 'accessing' stamp: 'DF 11/15/2021 16:58:54'!
-end
-	^self morphExtent / 2 + (Point r:self radius degrees:  180 + direction + angle).
-! !
-
-!ArcMorph methodsFor: 'accessing' stamp: 'DF 12/8/2020 19:23:52'!
-lineWidth: aNumber
-	lineWidth _ aNumber! !
-
-!ArcMorph methodsFor: 'accessing' stamp: 'DF 11/17/2021 18:49:42'!
-radius
-
-	| radius |
-	
-	radius _ (self morphLocalBounds width min: self morphLocalBounds height) / 2 - (lineWidth * 2).
-
-	^radius.
-! !
-
-!ArcMorph methodsFor: 'accessing' stamp: 'DF 11/15/2021 16:58:47'!
-start
-	^self morphExtent / 2 + (Point r: self radius degrees:  180 + direction).
-! !
-
-!ArcMorph methodsFor: 'drawing' stamp: 'DF 11/17/2021 18:48:54'!
-drawOn: aCanvas
-	
-	aCanvas strokeWidth: lineWidth color: color do:[
-		aCanvas moveTo: self  start ; arcTo: self end radius: self radius angleOfXAxis: 0 largeFlag: true sweepFlag: true ].
-! !
-
-!ArcMorph methodsFor: 'initialization' stamp: 'DF 11/15/2021 16:54:09'!
-initialize
-
-	super initialize.
-
-	direction _ 0. "0 is north".
-	
-	angle _ 360.
-	
-	lineWidth _ 2.
-! !
-
-!ArcMorph methodsFor: 'geometry testing' stamp: 'DF 12/8/2020 19:40:35'!
-morphContainsPoint: aLocalPoint
-	
-	^self morphLocalBounds containsPoint: aLocalPoint
-! !
-
-!ArcMorph methodsFor: 'as yet unclassified' stamp: 'DF 11/24/2021 14:24:55'!
-requiresVectorCanvas
-	^true! !
-
-!QuadraticBezier methodsFor: 'as yet unclassified' stamp: 'DF 11/14/2021 18:52:28'!
-arrow: aBoolean
-	arrow _ aBoolean! !
-
-!QuadraticBezier methodsFor: 'as yet unclassified' stamp: 'DF 11/14/2021 18:52:51'!
-arrowHeadLength: aNumber
-	arrowHeadLength _ aNumber ! !
-
-!QuadraticBezier methodsFor: 'as yet unclassified' stamp: 'DF 11/29/2023 19:14:22'!
-control
-	^control! !
-
-!QuadraticBezier methodsFor: 'as yet unclassified' stamp: 'DF 11/14/2021 18:41:10'!
-control: aPoint
-	control _ aPoint! !
-
-!QuadraticBezier methodsFor: 'as yet unclassified' stamp: 'DF 11/14/2021 18:48:12'!
-curveWidth: aNumber
-	curveWidth _ aNumber
-	! !
-
-!QuadraticBezier methodsFor: 'as yet unclassified' stamp: 'DF 11/24/2021 14:50:53'!
-drawArrowOn: aCanvas
-
-	| lineDirection |
-
-	lineDirection _ (end - control) normalized.
-		
-	aCanvas
-		line: end
-		to: end - (Point r: arrowHeadLength degrees: (lineDirection degrees - 30))
-		width: curveWidth
-		color: color.
-			
-	aCanvas
-		line: end
-		to: end - (Point r: arrowHeadLength degrees: (lineDirection degrees + 30))
-		width: curveWidth
-		color: color.
-	! !
-
-!QuadraticBezier methodsFor: 'as yet unclassified' stamp: 'DF 11/29/2023 19:26:12'!
-drawOn: aCanvas
-"
-	aCanvas
-		fillRectangle: self morphLocalBounds
-		color: Color lightBlue
-		borderWidth: borderWidth
-		borderStyleSymbol: #simple
-		baseColorForBorder: borderColor.
-	"	
-	aCanvas 	strokeWidth: curveWidth color: self color do:[
-		aCanvas moveTo: start;			quadraticBezierTo: end control: control].
-	
-	arrow ifTrue:[self drawArrowOn: aCanvas].! !
-
-!QuadraticBezier methodsFor: 'as yet unclassified' stamp: 'DF 11/29/2023 19:14:18'!
-end
-	^end
-	! !
-
-!QuadraticBezier methodsFor: 'as yet unclassified' stamp: 'DF 11/14/2021 18:41:03'!
-end: aPoint
-	end _ aPoint! !
-
-!QuadraticBezier methodsFor: 'as yet unclassified' stamp: 'DF 11/14/2021 18:58:10'!
-initialize
-
-	super initialize.
-	
-	start _ `0@0`.
-	end _ `1@01`.
-	control _ `1@1`.
-	curveWidth _ 1.
-	arrow _ false.
-	arrowHeadLength _ 8.
-	! !
-
-!QuadraticBezier methodsFor: 'as yet unclassified' stamp: 'DF 11/24/2021 14:22:59'!
-requiresVectorCanvas
-	^true! !
-
-!QuadraticBezier methodsFor: 'as yet unclassified' stamp: 'DF 11/29/2023 19:14:15'!
-start
-	^start! !
-
-!QuadraticBezier methodsFor: 'as yet unclassified' stamp: 'DF 11/14/2021 18:40:59'!
-start: aPoint
-	start _ aPoint! !
-
-!StateMorph methodsFor: 'as yet unclassified' stamp: 'DF 11/16/2021 17:47:22'!
-accepting: aBoolean
-	accepting _ aBoolean! !
-
-!StateMorph methodsFor: 'as yet unclassified' stamp: 'DF 11/29/2023 19:26:01'!
-drawOn: aCanvas 
-
-	| rx ry labelExtent labelBounds |
-	
-	"super drawOn: aCanvas."
-	
-	rx := extent x //2.
-	ry := extent y // 2.
-	
-	aCanvas ellipseCenter: rx @ ry radius: rx @ ry borderWidth: borderWidth borderColor: borderColor fillColor: color.
-
-	accepting ifTrue:[
-		aCanvas ellipseCenter: rx @ ry radius: 0.8* rx @ (0.8 * ry) borderWidth: borderWidth borderColor: borderColor fillColor: color.
-	].
-	
-	labelExtent := ((font widthOfString: label) max: 3)  @ font lineSpacing.
-	
-	labelBounds := `0@0` extent: labelExtent. 
-	
-	labelBounds := labelBounds aligned: labelBounds center with: self morphLocalBounds center.
-	
-	aCanvas drawString: label at: labelBounds origin font: font color: textColor.
-	
-	! !
-
-!StateMorph methodsFor: 'as yet unclassified' stamp: 'DF 11/16/2021 17:52:32'!
-font: aFont
-
-	font _ aFont! !
-
-!StateMorph methodsFor: 'as yet unclassified' stamp: 'DF 11/29/2023 17:59:44'!
-initialize
-
-	super initialize.
-
-	accepting := false.
-	
-	font := FontFamily defaultFamilyAndPointSize.
-	
-	textColor := Color black.
-	
-	label := ''.! !
-
-!StateMorph methodsFor: 'as yet unclassified' stamp: 'DF 11/16/2021 17:47:07'!
-label: aString
-	label _ aString! !
-
-!StateMorph methodsFor: 'as yet unclassified' stamp: 'DF 11/24/2021 14:25:21'!
-requiresVectorCanvas
-	^true! !
-
-!StateMorph methodsFor: 'as yet unclassified' stamp: 'DF 11/16/2021 17:59:15'!
-textColor: aColor
-	textColor _ aColor! !
 
 !WhiteboardMorph methodsFor: 'as yet unclassified' stamp: 'DF 12/15/2023 13:35:35'!
 addShape: aShape
@@ -597,41 +355,7 @@ state
 state: aDiagramState
 	state _ aDiagramState! !
 
-!DiagramSelfTransition methodsFor: 'morphic' stamp: 'DF 12/14/2023 21:04:37'!
-asMorph: aTransform with: properties 
-
-	| alpha anArcMorph extent anArrowMorph origin aLabelMorph radius |
-	
-	radius := properties at:#state_radius.
-	
-	alpha := (magnet position - state position) degrees.
-		
-	extent := aTransform scale * 2 * (radius @ radius).
-	
-	anArcMorph := ArcMorph new angle:270 ; direction: alpha + 45; morphExtent: extent; lineWidth:(properties at: #transition_morph_width); color: (properties at:#transition_morph_color); yourself.
-	
-	origin := (anArcMorph start + anArcMorph end) / 2.
-	
-	anArcMorph morphPosition: 	(aTransform transform: magnet position) - origin.
-
-	anArrowMorph := SimpleLineMorph new lineWidth:(properties at: #transition_morph_width) ; color: (properties at:#transition_morph_color); startPoint: anArcMorph end; endPoint: (Point r:1 degrees: alpha+ 60 + 180) ; arrow: true; arrowHeadLength: (properties at: #transition_morph_arrow_length); yourself.
-	
-	anArcMorph addMorph: anArrowMorph.
-	
-	aLabelMorph := LabelMorph new contents: label ; yourself.
-	
-	aLabelMorph font: (properties at: #transition_label_font).
-	
-	aLabelMorph  morphPosition: (Point r: extent x degrees: alpha) + origin.
-	
-	anArcMorph addMorph: aLabelMorph.
-	
-	(properties at:#debug_self_transition_labels) ifTrue:[
-		anArcMorph addMorph: (SimpleLineMorph new lineWidth:1 ; color: Color red; startPoint: origin; endPoint: (Point r: extent x degrees: alpha); arrow: true; yourself)].
-	
-	^anArcMorph ! !
-
-!DiagramSelfTransition methodsFor: 'morphic' stamp: 'DF 12/18/2023 22:48:06'!
+!DiagramSelfTransition methodsFor: 'layout' stamp: 'DF 12/18/2023 22:48:06'!
 layoutIn: aForceSolver around: magnets with: properties 
 
 	| radius anchor spring index maxa maxi a p |
@@ -665,7 +389,7 @@ layoutIn: aForceSolver around: magnets with: properties
 	aForceSolver addObject: anchor; addObject: magnet; addConstraint: spring.
 ! !
 
-!DiagramSelfTransition methodsFor: 'morphic' stamp: 'DF 12/14/2023 21:05:07'!
+!DiagramSelfTransition methodsFor: 'layout' stamp: 'DF 12/14/2023 21:05:07'!
 layoutIn: aForceSolver with: properties 
 
 	| anchor spring radius |
@@ -681,10 +405,10 @@ layoutIn: aForceSolver with: properties
 	aForceSolver addObject: anchor; addObject: magnet; addConstraint: spring.
 ! !
 
-!DiagramSelfTransition methodsFor: 'shapes' stamp: 'DF 12/18/2023 22:51:22'!
+!DiagramSelfTransition methodsFor: 'shapes' stamp: 'DF 12/19/2023 21:44:04'!
 drawOn: aWhiteboard canvas: aCanvas
 
-	| p pts c1 c2 r |
+	| p pts c1 c2 r vn font |
 	
 	p := state position + ((magnet position - state position) * 1.3).
 	r := state radius * 1.
@@ -702,7 +426,15 @@ drawOn: aWhiteboard canvas: aCanvas
 
 	aWhiteboard drawOn: aCanvas arrowHead: 8 at: pts first direction: (pts first - p) normal width:1 color: Color black.
 	
-	"aWhiteboard drawOn: aCanvas circleCenter: magnet position radius: 0.2* state radius borderWidth:1 borderColor: Color blue fillColor: Color red "! !
+	"aWhiteboard drawOn: aCanvas circleCenter: magnet position radius: 0.2* state radius borderWidth:1 borderColor: Color blue fillColor: Color red "
+	
+	vn := magnet position - state position.
+	
+	"aWhiteboard drawOn: aCanvas lineFrom: p to: (p + (vn * 1.2)) width:1 color: Color red."
+	
+	font := FontFamily defaultFamilyPointSize: 9.
+	
+	aWhiteboard drawOn: aCanvas string: label at: p + (vn * 1.2) font: font color: Color black.! !
 
 !DiagramState methodsFor: 'accessing' stamp: 'DF 12/13/2020 15:17:24'!
 accepting: aBoolean
@@ -740,31 +472,6 @@ radius
 radius: aNumber
 	radius := aNumber! !
 
-!DiagramState methodsFor: 'morphic' stamp: 'DF 12/15/2023 12:10:56'!
-asMorph: aTransform with: properties 
-
-	| aStateMorph color scale radius |
-
-	radius := properties at:#state_radius.
-	
-	scale := aTransform scale * 2 * radius.
-
-	aStateMorph := StateMorph new.
-	
-	aStateMorph morphExtent: scale @ scale ; morphPosition: (aTransform transform: position - (radius@radius)).
-	
-	color := initial ifTrue:[ properties at:#initial_state_morph_color ] ifFalse:[ properties at:#state_morph_color].
-	
-	aStateMorph color: color; borderWidth: (properties at:#state_border_width); borderColor: (properties at:#state_border_color).
-	
-	aStateMorph label: label ; accepting: accepting.
-	
-	aStateMorph font: (properties at:#state_morph_font); textColor: (properties at:#state_morph_label_color).
-	
-	^aStateMorph.
-	
-! !
-
 !DiagramState methodsFor: 'initialization' stamp: 'DF 12/15/2023 14:44:18'!
 initialize
 
@@ -775,7 +482,7 @@ initialize
 	
 ! !
 
-!DiagramState methodsFor: 'shapes' stamp: 'DF 12/15/2023 22:12:30'!
+!DiagramState methodsFor: 'shapes' stamp: 'DF 12/19/2023 21:43:16'!
 drawOn: aWhiteboard canvas: aCanvas
 
 	| font |
@@ -799,7 +506,7 @@ drawOn: aWhiteboard canvas: aCanvas
 
 	font :=FontFamily defaultFamilyPointSize:9.
 		
-	aWhiteboard drawOn: aCanvas string: label at: position font: font color: Color black.
+	aWhiteboard drawOn: aCanvas centeredString: label at: position font: font color: Color black.
 ! !
 
 !DiagramTransition methodsFor: 'initialization' stamp: 'DF 12/3/2021 19:43:04'!
@@ -810,59 +517,6 @@ initialize
 	labels _ OrderedCollection new.
 	
 ! !
-
-!DiagramTransition methodsFor: 'morphic' stamp: 'DF 12/3/2021 19:56:45'!
-asMorph: aTransform with: properties 
-
-	^(1 to: paths size) collect:[:index |
-		self pathAt: index asMorph: aTransform with:properties].
-	
-	! !
-
-!DiagramTransition methodsFor: 'morphic' stamp: 'DF 12/14/2023 19:55:00'!
-pathAt: index asMorph: aTransform with: properties 
-
-	| aMorph mpath rect aLabelMorph direction theta length d delta |
-	
-	aMorph := QuadraticBezier new.
-	
-	aMorph color: (properties at: #transition_morph_color); curveWidth: (properties at: #transition_morph_width); arrow:true.
-	
-	mpath := (paths at:index) collect:[:each | aTransform transform: each position ].
-
-	rect := Rectangle encompassing: mpath.
-	
-	aMorph morphPosition: rect origin ; morphExtent: rect extent.
-		
-	aMorph start: (mpath at:1) - rect origin ; control: (mpath at:2) - rect origin  ; end: (mpath at:3) - rect origin.
-	
-	direction := (mpath at:3) - (mpath at:2).
-
-	theta := direction normal theta.
-		
-	aLabelMorph := LabelMorph new contents: (labels at:index) ; yourself.
-	
-	aLabelMorph font: (properties at: #transition_label_font).
-	
-	length := ((aLabelMorph morphExtent x * 0.6 * (theta cos)) squared + ((aLabelMorph morphExtent y * (theta sin)) squared)) raisedTo:0.5.
-	
-	d := 0.4.
-	
-	delta := d / paths size.
-	
-	aLabelMorph  morphPosition: (mpath at:2) + (((mpath at:3) - (mpath at:2)) * (properties at:#transition_label_relative_position) * (1 - ((index - 1) * delta) ) ) + (direction normal * length) - (aLabelMorph morphExtent  / 2) - rect origin.
-		
-	aMorph addMorph: aLabelMorph.
-
-	(properties at: #debug_labels)	 ifTrue:[ | aLineMorph |
-		aLineMorph := SimpleLineMorph new startPoint: (mpath at:2) + (((mpath at:3) - (mpath at:2)) * (properties at:#transition_label_relative_position)) - rect origin ; endPoint: (direction normal * length) ; lineWidth: 3;yourself.
-	
-		aLineMorph color: Color red.
-	
-		aMorph addMorph: aLineMorph.
-	].
-	
-	^aMorph! !
 
 !DiagramTransition methodsFor: 'layout' stamp: 'DF 12/3/2021 19:49:57'!
 layoutIn: aForceSolver with: properties 
@@ -981,7 +635,7 @@ origin: aDiagramState
 paths
 	^paths! !
 
-!DiagramTransition methodsFor: 'shapes' stamp: 'DF 12/15/2023 21:32:44'!
+!DiagramTransition methodsFor: 'shapes' stamp: 'DF 12/19/2023 21:43:16'!
 drawOn: aWhiteboard canvas: aCanvas
 
 	| font |
@@ -1001,7 +655,7 @@ drawOn: aWhiteboard canvas: aCanvas
 		
 		"aWhiteboard drawOn: aCanvas lineFrom: b to: b + (n * n theta cos abs ) width:1 color: Color red."
 		
-		aWhiteboard drawOn: aCanvas string: (labels at:i) at: b + (n * n theta cos abs) + (0.1 * (n theta sin)) font: font color: Color black.
+		aWhiteboard drawOn: aCanvas centeredString: (labels at:i) at: b + (n * n theta cos abs) + (0.1 * (n theta sin)) font: font color: Color black.
 	]! !
 
 !StateDiagram methodsFor: 'initialization' stamp: 'DF 12/5/2021 16:48:21'!
@@ -1041,7 +695,7 @@ defaultDiagramName
 
 	^title ifNil:[properties at:#default_diagram_name] ! !
 
-!StateDiagram methodsFor: 'morphic' stamp: 'DF 12/18/2023 22:50:44'!
+!StateDiagram methodsFor: 'morphic' stamp: 'DF 12/19/2023 21:41:15'!
 drawOn: aWhiteboardMorph
 
 	aWhiteboardMorph removeAllShapes. 
@@ -1937,6 +1591,23 @@ drawOn: aCanvas arrowHead: length at: aPoint direction: aDirection width: aNumbe
 		color: aColor.
 	! !
 
+!Whiteboard methodsFor: 'drawing' stamp: 'DF 12/19/2023 21:43:16'!
+drawOn: aCanvas centeredString: aString at: aPoint font: aFont color: aColor 	
+
+	| p e b f |
+	
+	p := transform transform: aPoint.
+
+	e := ((aFont widthOfString: aString) max: 3)  @ aFont lineSpacing.
+	
+	b := p extent: e. 
+	
+	f := b aligned: b center with: p.
+	
+	"aCanvas frameRectangle: (f) borderWidth: 1 color: Color red."
+	
+	aCanvas drawString: aString at: f origin font: aFont color: aColor.! !
+
 !Whiteboard methodsFor: 'drawing' stamp: 'DF 12/15/2023 14:08:27'!
 drawOn: aCanvas circleCenter: aPoint radius: aNumber borderWidth: bwidth borderColor: bcolor fillColor: fcolor
 
@@ -1977,22 +1648,14 @@ drawOn: aCanvas quadraticBezierStart: startPoint control: controlPoint end: endP
 			quadraticBezierTo: e control: c 
 	]! !
 
-!Whiteboard methodsFor: 'drawing' stamp: 'DF 12/15/2023 20:55:28'!
+!Whiteboard methodsFor: 'drawing' stamp: 'DF 12/19/2023 21:43:42'!
 drawOn: aCanvas string: aString at: aPoint font: aFont color: aColor 	
 
-	| p e b f |
+	| p |
 	
 	p := transform transform: aPoint.
 
-	e := ((aFont widthOfString: aString) max: 3)  @ aFont lineSpacing.
-	
-	b := p extent: e. 
-	
-	f := b aligned: b center with: p.
-	
-	"aCanvas frameRectangle: (f) borderWidth: 1 color: Color red."
-	
-	aCanvas drawString: aString at: f origin font: aFont color: aColor.! !
+	aCanvas drawString: aString at: p font: aFont color: aColor.! !
 
 !Whiteboard methodsFor: 'as yet unclassified' stamp: 'DF 12/18/2023 19:45:49'!
 viewport: anotherRectangle
