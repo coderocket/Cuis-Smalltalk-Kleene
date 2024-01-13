@@ -1,6 +1,6 @@
-'From Cuis 6.0 [latest update: #6053] on 19 December 2023 at 10:01:54 pm'!
+'From Cuis6.3 [latest update: #6156] on 13 January 2024 at 7:19:31 pm'!
 'Description '!
-!provides: 'Kleene' 1 17!
+!provides: 'Kleene' 1 19!
 !requires: 'Gaudi' 1 0 nil!
 SystemOrganization addCategory: #Kleene!
 
@@ -243,7 +243,7 @@ testIntersection
 	self assert: (c1 intersection: c4) equals: { 0.75 @ (1 - 0.75 squared) sqrt . 0.75 @ (0 - (1 - 0.75 squared) sqrt) } asOrderedCollection.
 ! !
 
-!KleeneViewer class methodsFor: 'as yet unclassified' stamp: 'DF 12/18/2023 22:03:51'!
+!KleeneViewer class methodsFor: 'as yet unclassified' stamp: 'DF 1/13/2024 19:16:30'!
 open: model label: aString
 
 	| viewport a aWhiteboard aWhiteboardMorph aScrollPane aColumnMorph aRowMorph  aWindow |
@@ -256,7 +256,7 @@ open: model label: aString
 	
 	aWhiteboardMorph whiteboard: aWhiteboard; color: Color veryVeryLightGray.
 
-	aWhiteboardMorph morphExtent: 3000@2000.
+	aWhiteboardMorph morphExtent: 3000@3000.
 	
 	aScrollPane := GaudiViewerMorph new.
 	
@@ -268,8 +268,8 @@ open: model label: aString
 	
 	aRowMorph := LayoutMorph newRow.
 	
-	aRowMorph addMorph: aScrollPane proportionalWidth:0.8.
-	
+	aRowMorph addMorph: aScrollPane proportionalWidth:1.0 "0.8".
+	"
 	aRowMorph addMorph: (LabelGroup with: {
 		'radius' -> (SimpleNumberEntryMorph positiveFloatDefault: model getStateRadius maxNumChars:4 :: valueUpdator: [ :value | model setStateRadius: value]; yourself). 
 		'charge' -> (SimpleNumberEntryMorph positiveFloatDefault: model getStateCharge maxNumChars:4 :: valueUpdator: [ :value | model setStateCharge: value]; yourself). 
@@ -277,10 +277,10 @@ open: model label: aString
 		'strength' -> (SimpleNumberEntryMorph positiveFloatDefault: model getTransitionStrength maxNumChars:4 :: valueUpdator:[ :value | model setTransitionLength: value]; yourself).
 		'debug' -> (CheckButtonMorph new selected: false  ; yourself).
 	}) proportionalWidth:0.2.
-	
+	"
 	aColumnMorph addMorph: aRowMorph.
 	
-	aWindow := aColumnMorph embeddedInMorphicWindowLabeled: 'Kleene Viewer: ', model defaultDiagramName.
+	aWindow := aColumnMorph embeddedInMorphicWindowLabeled: 'Automata Viewer: ', model defaultDiagramName.
 
 	aWindow openInWorld.
 	
@@ -671,12 +671,12 @@ initialize
 	
 	properties _ CascadingProperties new parent: Defaults ; yourself.! !
 
-!StateDiagram methodsFor: 'morphic' stamp: 'DF 5/2/2022 17:31:24'!
+!StateDiagram methodsFor: 'morphic' stamp: 'DF 1/13/2024 18:51:16'!
 asMorphExtent: aPoint
 
 	| aKernelMorph |
 	
-	aKernelMorph _ BoxedMorph new.
+	aKernelMorph := BoxedMorph new.
 
 	aKernelMorph color: Color white.
 	
@@ -684,7 +684,7 @@ asMorphExtent: aPoint
 	
 	self populate: aKernelMorph.
 	
-	aKernelMorph scale: aPoint x / aKernelMorph morphExtent x.
+	"aKernelMorph scale: aPoint x / aKernelMorph morphExtent x."
 
 	^aKernelMorph
 	
@@ -781,26 +781,26 @@ layoutDiagram
 	
 	! !
 
-!StateDiagram methodsFor: 'layout' stamp: 'DF 3/7/2023 22:15:48'!
+!StateDiagram methodsFor: 'layout' stamp: 'DF 1/13/2024 19:06:22'!
 layoutStates
 
 	| charge range magnets constraints springLength springStrength aSolver |	
 
-	charge _ properties at: #state_charge.
+	charge := properties at: #state_charge.
 	
-	range _ properties at: #state_position_range.
+	range := properties at: #state_position_range.
 
-	springLength _ properties at: #state_layout_spring_length.
+	springLength := properties at: #state_layout_spring_length.
 
-	springStrength _ properties at: #state_layout_spring_strength.
+	springStrength := properties at: #state_layout_spring_strength.
 
-	magnets _ Dictionary new.
+	magnets := Dictionary new.
 	
 	states do:[:each | magnets at: each put: (Magnet charge: charge position: range atRandom @ range atRandom) ].
 
 	self arrange: magnets separatedBy: 2 * springLength.
 	
-	constraints _ Dictionary new.
+	constraints := Dictionary new.
 	
 	transitions 
 		do:[:each | 
@@ -808,7 +808,7 @@ layoutStates
 				ifAbsent:[constraints at: each key 
 					put: (Spring length: springLength  strength: springStrength between: (magnets at: each origin) and: (magnets at: each destination)) ] ].
 		
-	aSolver _ ForceDirectedSolver 	new.
+	aSolver := ForceDirectedSolver 	new.
 	
 	magnets do:[:each | aSolver addObject: each].
 	
@@ -863,6 +863,12 @@ magnetsAround: aDiagramState
 	magnets _ magnets sorted: [:p :q | (p position - aDiagramState position) theta <= (q position - aDiagramState position) theta ].
 	
 	^magnets! !
+
+!StateDiagram methodsFor: 'layout' stamp: 'DF 1/13/2024 18:44:51'!
+reshuffle: aRectangle
+
+	self layoutDiagram
+	! !
 
 !StateDiagram methodsFor: 'accessing' stamp: 'DF 12/5/2021 16:48:21'!
 addState: aDiagramState
@@ -1070,7 +1076,7 @@ example
 	aStateDiagram open.
 ! !
 
-!StateDiagram class methodsFor: 'examples' stamp: 'DF 12/15/2023 22:18:40'!
+!StateDiagram class methodsFor: 'examples' stamp: 'DF 1/13/2024 18:52:58'!
 example2
  
 	"self example2" 
@@ -1105,7 +1111,7 @@ example2
 
 	aStateDiagram setProperty: #state_layout_spring_strength to: 5.
 	
-	aStateDiagram setProperty: #state_layout_spring_length to: 10.
+	aStateDiagram setProperty: #state_layout_spring_length to: 7.
 	
 	aStateDiagram setProperty: #debug_labels to:true.
 	
@@ -1428,7 +1434,7 @@ example9
 
 ! !
 
-!StateDiagram class methodsFor: 'class initialization' stamp: 'DF 12/14/2023 20:54:05'!
+!StateDiagram class methodsFor: 'class initialization' stamp: 'DF 1/13/2024 19:03:14'!
 initialize
 
 	"self initialize"
@@ -1437,9 +1443,9 @@ initialize
 		  at: #state_diagram_inset put: 64
 		; at: #transition_line_width put:			1
 		; at: #state_position_range put: 800
-		; at: #state_radius put: 1
-		; at: #state_charge put: 1
-		; at: #state_layout_spring_length put: 10
+		; at: #state_radius put: 0.3
+		; at: #state_charge put: 3
+		; at: #state_layout_spring_length put: 3
 		; at: #state_layout_spring_strength put:0.75
 		; at: #state_layout_solver_iterations put: 100
 		; at: #state_layout_show_solution put: false
